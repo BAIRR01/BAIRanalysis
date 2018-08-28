@@ -26,13 +26,15 @@ function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, d
 %     session           = 'nyu3t01';
 %     tasks             = 'spatialobject';
 %     runnum            = 1:4;
-%     design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum);
+%     designFolder      = 'spatialobjectRoundedTR';  
+%     design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, designFolder);
 %
 % Example 2
 %     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual'; 
 %     subject           = 'wlsubj054';
 %     session           = 'nyu3t01';
 %     tasks             = 'spatialobject';
+%     designFolder      = 'spatialobjectRoundedTR';  
 %     design = bidsTSVtoDesign(projectDir, subject, session, tasks)
 %
 % See also bidsGLM.m
@@ -48,7 +50,7 @@ if ~exist('runnum', 'var'),     runnum  = [];   end
 % Specifiy the path to the design matrices for saving as tsv files
 if ~exist('designFolder', 'var'), designFolder = []; end
 designPath = fullfile(projectDir, 'derivatives', 'design_matrices', ...
-    sprintf('sub-%s',subject), sprintf('ses-%s',session), designFolder);
+    designFolder, sprintf('sub-%s',subject), sprintf('ses-%s',session));
 if ~exist(designPath, 'dir'), mkdir(designPath); end
 
 % TSV file with onsets to make the design matrix (vector)

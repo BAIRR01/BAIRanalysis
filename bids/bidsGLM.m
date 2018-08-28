@@ -55,20 +55,17 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     tasks             = 'spatialobject';
 %     runnums           = 1:4;
 %     dataFolder        = 'preprocessed';                 
-%     designFolder      = 'roundedTR';
+%     designFolder      = 'spatialobjectRoundedTR';
 %     modelType         = 'spatialObjectRoundedTR';
 %     glmOpts           = [];        
-%
+%       
+%     % make the design matrices
+%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder);
+%     % run the GLM
 %     bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %        dataFolder, designFolder, modelType, glmOpts);
 %
-% Example 2
-%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual'; 
-%     subject           = 'wlsubj054';
-%
-%     results = bidsGLM(projectDir, subject);
-%
-%
+%   See also bidsTSVtoDesign
 
 %% Check inputs
 
@@ -92,7 +89,7 @@ rawDataPath = fullfile(projectDir, sprintf('sub-%s', subject), ...
 % <designFolder>
 if ~exist('designFolder', 'var'), designFolder = []; end
 designPath = fullfile(projectDir, 'derivatives', 'design_matrices', ...
-    sprintf('sub-%s',subject), sprintf('ses-%s',session), designFolder);
+    designFolder, sprintf('sub-%s',subject), sprintf('ses-%s',session));
 if ~exist(designPath, 'dir')
     error('Design path not found: %s', designPath); 
 end
@@ -151,6 +148,10 @@ if ~exist(figuredir, 'dir'); mkdir(figuredir); end
 
 
 results  = GLMdenoisedata(design,data,stimdur,tr,hrfmodel,hrfknobs,opt,figuredir);
+
+% save the results
+fname = sprintf('sub-%s_ses-%s_%s_results', subject, session, modelType);
+save(fullfile(figuredir, fname), 'results');
 
 end
 
