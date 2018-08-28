@@ -1,8 +1,8 @@
 function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
-        dataFolder, designFolder, modelType, glmOpts)
+        dataFolder, designFolder, modelType, glmOptsPath)
 %
 % results = bidsGLM(projectDir, subject, [session], [tasks], [runnums], ...
-%        [dataFolder], [designFolder], [modelType], [glmOpts]);
+%        [dataFolder], [designFolder], [modelType], [glmOptsPath]);
 %
 % Input
 %
@@ -37,7 +37,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %                           default = tr;
 %     modelType:        name of folder to store outputs of GLMdenoised (string)
 %                           default = designFolder;
-%     glmOpts:          path to json file specifying GLMdenoise options
+%     glmOptsPath:      path to json file specifying GLMdenoise options
 %                           default = [];
 % 
 % Output
@@ -46,7 +46,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %
 % Dependencies
 %     GLMdenoisedata repository (https://github.com/kendrickkay/GLMdenoise)
-%     BIDS matlab toolbox: for now: /Volumes/server/Projects/BAIR/Data/BIDS/visual/derivatives/Analyses/visual/code
+%     
 %
 % Example 1
 %     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual'; 
@@ -57,21 +57,36 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     dataFolder        = 'preprocessed';                 
 %     designFolder      = 'spatialobjectRoundedTR';
 %     modelType         = 'spatialObjectRoundedTR';
-%     glmOpts           = [];        
+%     glmOptsPath       = [];        
 %       
 %     % make the design matrices
 %     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder);
 %     % run the GLM
 %     bidsGLM(projectDir, subject, session, tasks, runnums, ...
-%        dataFolder, designFolder, modelType, glmOpts);
+%        dataFolder, designFolder, modelType, glmOptsPath);
 %
+% Example 2
+%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual'; 
+%     subject           = 'wlsubj054';
+%     tasks             = 'spatialobject';
+%     runnums           = 1:2;
+%     dataFolder        = 'preprocessed';                 
+%     designFolder      = 'spatialObjectAssumeHRF';
+%     glmOptsPath       = '~/matlab/toolboxes/BAIRanalysis/files/glmOpts';        
+%       
+%     % make the design matrices
+%     bidsTSVtoDesign(projectDir, subject, [], tasks, runnums, designFolder);
+%     % run the GLM
+%     bidsGLM(projectDir, subject, [], tasks, runnums, ...
+%        dataFolder, designFolder, [], glmOptsPath);
 %   See also bidsTSVtoDesign
 
 %% Check inputs
 
-if ~exist('session', 'var'),    session = [];   end
-if ~exist('tasks', 'var'),      tasks   = [];   end
-if ~exist('runnums', 'var'),     runnums  = [];   end
+if ~exist('session', 'var'),     session = [];      end
+if ~exist('tasks', 'var'),       tasks   = [];      end
+if ~exist('runnums', 'var'),     runnums  = [];     end
+if ~exist('glmOptsPath', 'var'), glmOptsPath = [];  end
 
 [session, tasks, runnums] = bidsSpecifyEPIs(projectDir, subject,...
     session, tasks, runnums);
@@ -99,9 +114,6 @@ if ~exist('modelType', 'var') || isempty(modelType)
     modelType = designFolder;
 end
 
-% <glmOpts>
-if ~exist('glmOpts', 'var'), glmOpts = []; end
-
 
 %% Create GLMdenoisedata inputs
 
@@ -126,19 +138,10 @@ hrfknobs = [];
 opt      = [];
 
 % glm opts
-% 
-% if ~exist('glmOpts', 'var') || isempty(glmOpts)
-%     glmOpts = glmOptsMakeDefaultFile();
-% end
+[hrfmodel,hrfknobs,opt] = getGlmOpts(glmOptsPath);
 
-%  <hrfmodel>
-
-%   <hrfknobs>
-
-%   <opt>
 
 %   <figuredir>
-
 figuredir   = fullfile (projectDir,'derivatives','GLMdenoise', modelType, ...
                  sprintf('sub-%s',subject), sprintf('ses-%s',session), 'figures');
 
@@ -146,12 +149,11 @@ if ~exist(figuredir, 'dir'); mkdir(figuredir); end
 
 %% Run the denoising alogithm
 
-
 results  = GLMdenoisedata(design,data,stimdur,tr,hrfmodel,hrfknobs,opt,figuredir);
 
 % save the results
 fname = sprintf('sub-%s_ses-%s_%s_results', subject, session, modelType);
-save(fullfile(figuredir, fname), 'results');
+save(fullfile(figuredir, fname), 'results', '-v7.3');
 
 end
 
@@ -244,10 +246,52 @@ end
 
 end
 
-                      
-function pth = glmOptsMakeDefaultFile()
-    % field / value pairs
-    
+function [hrfmodel,hrfknobs,opt] = getGlmOpts(glmOptsPath)
 
+if ~exist('glmOptsPath', 'var') || isempty(glmOptsPath)
+    glmOptsPath = glmOptsMakeDefaultFile; 
+end
+
+json = loadjson(glmOptsPath);
+hrfmodel = json.hrfmodel;
+hrfknobs = json.hrfknobs;
+opt      = json.opt;
+
+end
+
+
+function pth = glmOptsMakeDefaultFile()
+    % see GLMdenoisedata for descriptions of optional input 
+    
+    % hrf
+    json.hrfmodel = [];  % 'optimize';
+    json.hrfknobs = [];  % 
+    
+    % other opts
+    json.opt.extraregressors = []; 
+    json.opt.maxpolydeg = []; 
+    json.opt.seed = [];
+    json.opt.bootgroups = [];
+    json.opt.numforhrf = [];
+    json.opt.hrffitmask = [];
+    json.opt.brainthresh = [];
+    json.opt.brainR2 = [];
+    json.opt.brainexclude = [];
+    json.opt.numpcstotry = [];
+    json.opt.pcR2cutoff = [];
+    json.opt.pcR2cutoffmask = [];
+    json.opt.pcstop = [];
+    json.opt.pccontrolmode = [];
+    json.opt.numboots = [];
+    json.opt.denoisespec = [];
+    json.opt.wantpercentbold = [];
+    json.opt.hrfthresh = [];
+    json.opt.noisepooldirect = [];
+    json.opt.wantparametric = [];
+    json.opt.wantsanityfigures = [];
+    json.opt.drawfunction = [];
+                  
+    pth = fullfile(tempdir, 'glmOpts');
+    savejson('', json, 'FileName', pth);
 end          
            
