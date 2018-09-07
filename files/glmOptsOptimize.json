@@ -1,5 +1,5 @@
 {
-	"hrfmodel": "assume",
+	"hrfmodel": "optimize",
 	"hrfknobs": null,
 	"opt": {
 		"extraregressors": null,

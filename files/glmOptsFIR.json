@@ -1,6 +1,6 @@
 {
-	"hrfmodel": "assume",
-	"hrfknobs": null,
+	"hrfmodel": "fir",
+	"hrfknobs": 40,
 	"opt": {
 		"extraregressors": null,
 		"maxpolydeg": null,

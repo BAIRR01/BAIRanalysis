@@ -1,8 +1,8 @@
 function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
-        dataFolder, designFolder, modelType, glmOptsPath)
+        dataFolder, designFolder, stimdur, modelType, glmOptsPath)
 %
 % results = bidsGLM(projectDir, subject, [session], [tasks], [runnums], ...
-%        [dataFolder], [designFolder], [modelType], [glmOptsPath]);
+%        [dataFolder], [designFolder], [modelType], [stimdur], [glmOptsPath]);
 %
 % Input
 %
@@ -56,6 +56,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     runnums           = 1:4;
 %     dataFolder        = 'preprocessed';                 
 %     designFolder      = 'spatialobjectRoundedTR';
+%     stimdur           = 0.5;
 %     modelType         = 'spatialObjectRoundedTR';
 %     glmOptsPath       = [];        
 %       
@@ -63,7 +64,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder);
 %     % run the GLM
 %     bidsGLM(projectDir, subject, session, tasks, runnums, ...
-%        dataFolder, designFolder, modelType, glmOptsPath);
+%        dataFolder, designFolder, stimdur, modelType, glmOptsPath);
 %
 % Example 2
 %     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual'; 
@@ -78,7 +79,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     bidsTSVtoDesign(projectDir, subject, [], tasks, runnums, designFolder);
 %     % run the GLM
 %     bidsGLM(projectDir, subject, [], tasks, runnums, ...
-%        dataFolder, designFolder, [], glmOptsPath);
+%        dataFolder, designFolder, [], [], glmOptsPath);
 %   See also bidsTSVtoDesign
 
 %% Check inputs
@@ -128,15 +129,9 @@ data = getData(dataPath, tasks, runnums);
 tr = getTR(rawDataPath,tasks, runnums);
 
 % <stimdur>
-if ~exist('stimdur', 'var') || isempty(stimdur),
-    stimdur = tr; 
-end
+if ~exist('stimdur', 'var') || isempty(stimdur), stimdur = tr;  end
 
 %****** Optional inputs to GLMdenoise *******************
-hrfmodel = [];
-hrfknobs = [];
-opt      = [];
-
 % glm opts
 [hrfmodel,hrfknobs,opt] = getGlmOpts(glmOptsPath);
 
@@ -149,7 +144,18 @@ if ~exist(figuredir, 'dir'); mkdir(figuredir); end
 
 %% Run the denoising alogithm
 
-results  = GLMdenoisedata(design,data,stimdur,tr,hrfmodel,hrfknobs,opt,figuredir);
+if length(design) == 1
+
+    warning(['Calling <GLMestimatemodel> rather than <GLMdenoisedata> ' ...
+        'because there is only 1 scan, so cross-validation is not possible.']);
+    
+    results = GLMestimatemodel(design,data,stimdur,tr,hrfmodel,hrfknobs,0,opt);
+
+else
+    
+    results  = GLMdenoisedata (design,data,stimdur,tr,hrfmodel,hrfknobs,opt,figuredir);
+
+end
 
 % save the results
 fname = sprintf('sub-%s_ses-%s_%s_results', subject, session, modelType);
@@ -253,9 +259,14 @@ if ~exist('glmOptsPath', 'var') || isempty(glmOptsPath)
 end
 
 json = loadjson(glmOptsPath);
-hrfmodel = json.hrfmodel;
-hrfknobs = json.hrfknobs;
-opt      = json.opt;
+
+if isfield(json, 'hrfmodel'), hrfmodel = json.hrfmodel;
+else, hrfmodel = 'optimize'; end
+
+if isfield(json, 'hrfknobs'), hrfknobs = json.hrfknobs;
+else, hrfknobs = []; end
+
+if isfield(json, 'opt'), opt = json.opt; else, opt = []; end
 
 end
 
@@ -264,7 +275,7 @@ function pth = glmOptsMakeDefaultFile()
     % see GLMdenoisedata for descriptions of optional input 
     
     % hrf
-    json.hrfmodel = [];  % 'optimize';
+    json.hrfmodel = 'optimize';  %
     json.hrfknobs = [];  % 
     
     % other opts
