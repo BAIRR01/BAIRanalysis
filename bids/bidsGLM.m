@@ -72,7 +72,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     runnums           = 1:2;
 %     dataFolder        = 'preprocessed';                 
 %     designFolder      = 'spatialObjectAssumeHRF';
-%     glmOptsPath       = '~/matlab/toolboxes/BAIRanalysis/files/glmOpts';        
+%     glmOptsPath       = '~/matlab/toolboxes/BAIRanalysis/files/glmOpts.json';        
 %       
 %     % make the design matrices
 %     bidsTSVtoDesign(projectDir, subject, [], tasks, runnums, designFolder);
@@ -291,7 +291,7 @@ function pth = glmOptsMakeDefaultFile()
     json.opt.wantsanityfigures = [];
     json.opt.drawfunction = [];
                   
-    pth = fullfile(tempdir, 'glmOpts');
+    pth = fullfile(tempdir, 'glmOpts.json');
     savejson('', json, 'FileName', pth);
 end          
            
