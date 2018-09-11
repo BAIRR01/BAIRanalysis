@@ -81,6 +81,45 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     bidsGLM(projectDir, subject, [], tasks, runnums, ...
 %        dataFolder, designFolder, [], [], glmOptsPath);
 %   See also bidsTSVtoDesign
+%
+% Example 3
+%   Two step GLM: (1) optimze the hRF from an hrf-specific scan, then use the
+%           optimzed hRF for denoising other scan types
+% 
+%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
+%     subject           = 'wlsubj048';
+%     session           = 'nyu3t01';
+%     tasks             = 'hrf';
+%     runnums           = [];
+%     dataFolder        = 'preprocessed';
+%     designFolder      = 'hrfRoundedTROptimize';
+%     stimdur           = 0.5;
+%     modelType         = [];
+%     glmOptsPath       = 'glmOptsOptimize.json';
+% 
+%     % FIRST GLM
+%     % make the design matrices
+%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder);
+%     % run it
+%     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
+%         dataFolder, designFolder, stimdur, modelType, glmOptsPath);
+%     % look at the hrf
+%     figure, plot(results.models{1})
+% 
+%     % SECOND GLM
+%     tasks             = {'spatialobject' 'spatialpattern' 'temporalpattern'};
+%     runnums           = [];
+%     designFolder      = 'roundedTR';
+%     glmOptsPath       = 'glmOptsAssume.json';
+%     json = loadjson(glmOptsPath);
+%     json.hrfknobs     = results.models{1};
+%     glmOptsPath       = fullfile(tempdir,glmOptsPath);
+%     savejson('', json, 'FileName', glmOptsPath);
+% 
+%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder);
+%     % run it
+%     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
+%         dataFolder, designFolder, stimdur, modelType, glmOptsPath);
 
 %% Check inputs
 
