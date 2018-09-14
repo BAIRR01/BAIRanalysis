@@ -135,7 +135,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     stimdur           = 0.5;
 %     modelType         = [];
 %     glmOptsPath       = 'glmOptsOptimize.json';
-%     tr                = ..85/5 ; % original data upsampled by 5x
+%     tr                = .85/5 ; % original data upsampled by 5x
 %
 %     % FIRST GLM
 %     % make the design matrices
