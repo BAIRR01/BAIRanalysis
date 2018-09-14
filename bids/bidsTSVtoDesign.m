@@ -94,7 +94,7 @@ for ii = 1:length(tasks)
         json         = fileread(fullfile(pth, jsonfile));
         json_info    = jsondecode(json);
         
-        if exist(tr, 'var') && ~isempty(tr)
+        if exist('tr', 'var') && ~isempty(tr)
             TR(scan)     = tr;
         else
             TR(scan)     = json_info.RepetitionTime;
