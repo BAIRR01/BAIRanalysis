@@ -128,18 +128,20 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
 %     subject           = 'wlsubj048';
 %     session           = 'nyu3t01';
-%     tasks             = 'hrf';
+%     tasks             = {'hrf' 'spatialobject' 'spatialpattern' 'temporalpattern'};
 %     runnums           = [];
 %     dataFolder        = 'preprocessedUpsampled';
 %     designFolder      = 'preprocessedUpsampled';
 %     stimdur           = 0.5;
 %     modelType         = [];
-%     glmOptsPath       = 'glmOptsOptimize.json';
 %     tr                = .85/5 ; % original data upsampled by 5x
 %
-%     % FIRST GLM
 %     % make the design matrices
-%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder, tr);
+%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder, tr, dataFolder);
+%
+%     % FIRST GLM
+%     glmOptsPath       = 'glmOptsOptimize.json';
+%     tasks             = {'hrf'};
 %     % run it
 %     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %         dataFolder, designFolder, stimdur, modelType, glmOptsPath, tr);
@@ -155,7 +157,6 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     glmOptsPath       = fullfile(tempdir,glmOptsPath);
 %     savejson('', json, 'FileName', glmOptsPath);
 % 
-%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder, tr);
 %     % run it
 %     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %         dataFolder, designFolder, stimdur, modelType, glmOptsPath, tr);

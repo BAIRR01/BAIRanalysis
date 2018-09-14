@@ -1,4 +1,4 @@
-function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, designFolder, tr)
+function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, designFolder, tr, dataFolder)
 %Convert tsv files from BIDS directory to design matrices for GLM
 % design = bidsTSVtoDesign(projectDir, subject, [session], [tasks], [runnum], [designFolder])
 %
@@ -19,6 +19,8 @@ function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, d
 %                           design_matrices
 %     tr:               temporal resolution for design matrix
 %                           default = TR from json file for fMRI scan
+%     dataFolder        path to folder with data to use for GLM
+%                           default = [], which means use the original EPIs
 %
 % Output
 %     design:           Matrix or cell array of matrices, time by condition
@@ -62,6 +64,13 @@ pth = fullfile(projectDir, sprintf('sub-%s', subject), ...
 
 assert(exist(pth, 'dir')>0)
 
+if exist('dataFolder', 'var') && ~isempty(dataFolder)
+    datapath = fullfile(projectDir, 'derivatives', dataFolder, ...
+        sprintf('sub-%s', subject), sprintf('ses-%s', session));
+else
+    datapath = pth;
+end
+
 % total number of runs across tasks
 n = sum(cellfun(@numel, runnum));
 
@@ -75,31 +84,23 @@ TR     = zeros(1,n);
 scan = 1;
 for ii = 1:length(tasks)
     for jj = 1:length(runnum{ii})
+                             
+        % Numvol (or numrows in design matrix)
+        [~, hdr] = bidsGetPreprocData(datapath, tasks(ii), {runnum{ii}(jj)});
+        numvol(scan) = hdr.ImageSize(end);
         
-              
+        % TR
+        if exist('tr', 'var') && ~isempty(tr)
+            TR(scan)     = tr;            
+        else
+            TR(scan) = bidsGetJSONval(datapath,tasks(ii), {runnum{ii}(jj)}, 'RepetitionTime');
+        end
+            
+        % TSV
         prefix = sprintf('sub-%s_ses-%s_task-%s_run-%d', ...
             subject, session, tasks{ii}, runnum{ii}(jj));
-        
-        epifile  = sprintf('%s_bold.nii.gz', prefix);
-        jsonfile = sprintf('%s_bold.json', prefix);
-        tsvfile  = sprintf('%s_events.tsv', prefix);
-        
-        assert(exist(fullfile(pth,epifile), 'file')>0)        
-        assert(exist(fullfile(pth,tsvfile), 'file')>0)
-        assert(exist(fullfile(pth,jsonfile), 'file')>0)
-        
-        % check scan length and TR length
-        hdr          = niftiinfo(fullfile(pth, epifile));
-        numvol(scan) = hdr.ImageSize(end);
-        json         = fileread(fullfile(pth, jsonfile));
-        json_info    = jsondecode(json);
-        
-        if exist('tr', 'var') && ~isempty(tr)
-            TR(scan)     = tr;
-        else
-            TR(scan)     = json_info.RepetitionTime;
-        end
-                
+        tsvfile  = sprintf('%s_events.tsv', prefix);        
+        assert(exist(fullfile(pth,tsvfile), 'file')>0)  
         T{scan}      = tdfread(fullfile(pth,tsvfile));
         
         scan = scan+1;
@@ -122,7 +123,7 @@ num_conditions = length(unique_conditions);
 %   loop over all runs and make each matrix
 for ii = 1:n   
     
-    m = zeros(numvol(ii), num_conditions);
+    m = zeros(numrows(ii), num_conditions);
     these_conditions = T{ii}.trial_type;    
     [~,col_num] = ismember(these_conditions, unique_conditions);
     

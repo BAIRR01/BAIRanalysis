@@ -1,4 +1,4 @@
-function[data, info] = bidsGetPreprocData(dataPath, tasks, runnums)
+function [data, info] = bidsGetPreprocData(dataPath, tasks, runnums)
 %
 % Inputs
 %   dataPath:   path to folder containing preprocessed data
