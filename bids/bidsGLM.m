@@ -2,7 +2,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
         dataFolder, designFolder, stimdur, modelType, glmOptsPath)
 %
 % results = bidsGLM(projectDir, subject, [session], [tasks], [runnums], ...
-%        [dataFolder], [designFolder], [modelType], [stimdur], [glmOptsPath]);
+%        [dataFolder], [designFolder], [modelType], [stimdur], [glmOptsPath], [tr]);
 %
 % Input
 %
@@ -39,7 +39,8 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %                           default = designFolder;
 %     glmOptsPath:      path to json file specifying GLMdenoise options
 %                           default = [];
-% 
+%     tr:               repetion time for EPI
+%                           default = same as TR from raw data EPI
 % Output
 %     results:          structured array with GLMdenoise results
 %                           See GLMdenoisedata for details.
@@ -120,7 +121,44 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     % run it
 %     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %         dataFolder, designFolder, stimdur, modelType, glmOptsPath);
-
+%
+% % Example 4
+%   Two step GLM with upsampled and slice-time-corrected data/design matrices: 
+% 
+%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
+%     subject           = 'wlsubj048';
+%     session           = 'nyu3t01';
+%     tasks             = 'hrf';
+%     runnums           = [];
+%     dataFolder        = 'preprocessedUpsampled';
+%     designFolder      = 'preprocessedUpsampled';
+%     stimdur           = 0.5;
+%     modelType         = [];
+%     glmOptsPath       = 'glmOptsOptimize.json';
+%     tr                = ..85/5 ; % original data upsampled by 5x
+%
+%     % FIRST GLM
+%     % make the design matrices
+%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder, tr);
+%     % run it
+%     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
+%         dataFolder, designFolder, stimdur, modelType, glmOptsPath, tr);
+%     % look at the hrf
+%     figure, plot(results.models{1})
+% 
+%     % SECOND GLM
+%     tasks             = {'spatialobject' 'spatialpattern' 'temporalpattern'};
+%     runnums           = [];
+%     glmOptsPath       = 'glmOptsAssume.json';
+%     json = loadjson(glmOptsPath);
+%     json.hrfknobs     = results.models{1};
+%     glmOptsPath       = fullfile(tempdir,glmOptsPath);
+%     savejson('', json, 'FileName', glmOptsPath);
+% 
+%     bidsTSVtoDesign(projectDir, subject, session, tasks, runnums, designFolder, tr);
+%     % run it
+%     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
+%         dataFolder, designFolder, stimdur, modelType, glmOptsPath, tr);
 %% Check inputs
 
 if ~exist('session', 'var'),     session = [];      end
@@ -162,10 +200,19 @@ end
 design = getDesign(designPath, tasks, runnums);
 
 % <data>
-data = getData(dataPath, tasks, runnums);
+data = bidsGetPreprocData(dataPath, tasks, runnums);
 
 % <tr>
-tr = getTR(rawDataPath,tasks, runnums);
+tr = bidsGetJSONval(rawDataPath,tasks, runnums, 'RepetitionTime');
+tr = cell2mat(tr);
+if length(unique(tr)) > 1
+    disp(unique(tr))
+    error(['More than one TR found:' ...
+        'GLMdenoise expects all scans to have the same TR.'])
+else
+    tr = unique(tr);
+end
+
 
 % <stimdur>
 if ~exist('stimdur', 'var') || isempty(stimdur), stimdur = tr;  end
@@ -245,51 +292,6 @@ for ii = 1:length(tasks)
 end
 end
 
-function data = getData(dataPath, tasks, runnums)
-%   <data> is the time-series data with dimensions X x Y x Z x time or a cell vector of 
-%   elements that are each X x Y x Z x time.
-
-fprintf('Loading data')
-scan = 1;
-for ii = 1:length(tasks)
-    for jj = 1:length(runnums{ii})
-        fprintf('.')
-        fnamePrefix  = sprintf('/*_task-%s_run-%d_preproc.nii*',tasks{ii},runnums{ii}(jj));
-        fname         = dir([dataPath fnamePrefix]);
-        assert(~isempty(fname));
-        
-        data{scan}    = niftiread(fullfile (dataPath, fname.name));
-        scan          = scan+1;
-    end
-end
-fprintf('\n')
-end
-
-function tr = getTR(rawDataPath,tasks, runnums)
-% <tr> is the sampling rate in seconds
-
-scan = 1;
-for ii = 1:length(tasks)
-    for jj = 1:length(runnums{ii})
-        
-        jsonPrefix = sprintf('/*_task-%s_run-%d_bold.json',tasks{ii}, runnums{ii}(jj));
-        jsonName    = dir([rawDataPath jsonPrefix]);
-        json        = fileread(fullfile (rawDataPath, jsonName.name));
-        jsonInfo    = jsondecode(json);
-        tr(scan)    = jsonInfo.RepetitionTime; % 850 ms
-        scan        = scan+1;
-    end
-end
-
-if length(unique(tr)) > 1
-    disp(unique(tr))
-    error(['More than one TR found:' ...
-        'GLMdenoise expects all scans to have the same TR.'])
-else
-    tr = unique(tr);
-end
-
-end
 
 function [hrfmodel,hrfknobs,opt] = getGlmOpts(glmOptsPath)
 

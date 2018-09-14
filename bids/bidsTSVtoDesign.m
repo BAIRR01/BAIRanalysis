@@ -1,4 +1,4 @@
-function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, designFolder)
+function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, designFolder, tr)
 %Convert tsv files from BIDS directory to design matrices for GLM
 % design = bidsTSVtoDesign(projectDir, subject, [session], [tasks], [runnum], [designFolder])
 %
@@ -17,6 +17,9 @@ function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, d
 %                               <projectDir>/derivatives/design_matrices/
 %                           default = [], which means no subfolder inside
 %                           design_matrices
+%     tr:               temporal resolution for design matrix
+%                           default = TR from json file for fMRI scan
+%
 % Output
 %     design:           Matrix or cell array of matrices, time by condition
 %
@@ -90,7 +93,12 @@ for ii = 1:length(tasks)
         numvol(scan) = hdr.ImageSize(end);
         json         = fileread(fullfile(pth, jsonfile));
         json_info    = jsondecode(json);
-        TR(scan)     = json_info.RepetitionTime; % 850 ms
+        
+        if exist(tr, 'var') && ~isempty(tr)
+            TR(scan)     = tr;
+        else
+            TR(scan)     = json_info.RepetitionTime;
+        end
                 
         T{scan}      = tdfread(fullfile(pth,tsvfile));
         
