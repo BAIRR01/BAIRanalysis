@@ -31,10 +31,11 @@ function bidsInitVista(projectDir, subject, session, tasks,... % runnums,
 %                            fullfile(fileparts(projectDir), 'Analyses', <subj>, <session>);
 % Example:
 %
-% projectDir = '/Volumes/server/Projects/BAIR/Data/BIDS/tactilepilot';
-% subject    = 'wlsubj063';
+% projectDir  = '/Volumes/server/Projects/BAIR/Data/BIDS/tactilepilot';
+% subject     = 'wlsubj063';
+% analysisDir = '/Volumes/server/Projects/BAIR/Analyses/tactilepilot/sub-wlsubj063/ses-nyu3t01'
 %
-% bids_initVista(projectDir, subject)
+% bidsInitVista(projectDir, subject, [] , [], [], analysisDir)
 
 %% Check inputs
 
@@ -52,9 +53,10 @@ dataPath = fullfile (projectDir,'derivatives', dataFolder,...
 assert(boolean(exist(dataPath, 'dir')))
 
 % <Analysis folder>
-if ~exist('analysisDir' , 'dir')
+if ~exist(analysisDir , 'dir')
     analysisDir = fullfile (fileparts (projectDir), 'Analyses', ...
         sprintf('sub-%s',subject), sprintf('ses-%s',session));
+   
 end
 assert(boolean(exist(analysisDir, 'dir')))
 cd(analysisDir);
