@@ -6,11 +6,16 @@ function [data, info] = bidsGetPreprocData(dataPath, tasks, runnums, usePreproc)
 %   runnums:    cell array of runnumbers, equal in length to tasks
 %   usePreproc: boolean: if true, use preprocessed data from derivatives
 %                       folder, else use data from func folder
+%                       default: true
 %
 % Output
 %   data:       the time-series data for each run with dimensions 
 %                X x Y x Z x time 
 %   info:       nifti header for each run
+
+if ~exist('usePreproc', 'var') || isempty(usePreproc)
+    usePreproc = true;
+end
 
 numruns = sum(cellfun(@numel, runnums));
 

@@ -1,5 +1,5 @@
 function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
-        dataFolder, designFolder, stimdur, modelType, glmOptsPath)
+        dataFolder, designFolder, stimdur, modelType, glmOptsPath, tr)
 %
 % results = bidsGLM(projectDir, subject, [session], [tasks], [runnums], ...
 %        [dataFolder], [designFolder], [modelType], [stimdur], [glmOptsPath], [tr]);
@@ -204,17 +204,17 @@ design = getDesign(designPath, tasks, runnums);
 data = bidsGetPreprocData(dataPath, tasks, runnums);
 
 % <tr>
-tr = bidsGetJSONval(rawDataPath,tasks, runnums, 'RepetitionTime');
-tr = cell2mat(tr);
-if length(unique(tr)) > 1
-    disp(unique(tr))
-    error(['More than one TR found:' ...
-        'GLMdenoise expects all scans to have the same TR.'])
-else
-    tr = unique(tr);
+if ~exist('tr', 'var') || isempty(tr)
+    tr = bidsGetJSONval(rawDataPath,tasks, runnums, 'RepetitionTime');
+    tr = cell2mat(tr);
+    if length(unique(tr)) > 1
+        disp(unique(tr))
+        error(['More than one TR found:' ...
+            'GLMdenoise expects all scans to have the same TR.'])
+    else
+        tr = unique(tr);
+    end
 end
-
-
 % <stimdur>
 if ~exist('stimdur', 'var') || isempty(stimdur), stimdur = tr;  end
 
