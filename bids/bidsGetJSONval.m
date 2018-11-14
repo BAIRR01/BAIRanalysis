@@ -17,8 +17,8 @@ scan = 1;
 for ii = 1:length(tasks)
     for jj = 1:length(runnums{ii})
         
-        jsonPrefix = sprintf('/*_task-%s_run-%d_bold.json',tasks{ii}, runnums{ii}(jj));
-        jsonName    = dir([rawDataPath jsonPrefix]);
+        jsonPrefix = sprintf('*_task-%s_run-%d_bold.json',tasks{ii}, runnums{ii}(jj));
+        jsonName    = dir(fullfile(rawDataPath, jsonPrefix));
         json        = fileread(fullfile (rawDataPath, jsonName.name));
         jsonInfo    = jsondecode(json);
         val{scan}   = jsonInfo.(fieldname); 

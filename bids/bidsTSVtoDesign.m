@@ -48,6 +48,8 @@ function design = bidsTSVtoDesign(projectDir, subject, session, tasks, runnum, d
 if ~exist('session', 'var'),    session = [];   end
 if ~exist('tasks', 'var'),      tasks   = [];   end
 if ~exist('runnum', 'var'),     runnum  = [];   end
+if exist('dataFolder', 'var') && ~isempty(dataFolder), usePreproc = true;
+else, usePreproc = false; end
 
 [session, tasks, runnum] = bidsSpecifyEPIs(projectDir, subject,...
     session, tasks, runnum);
@@ -64,8 +66,7 @@ pth = fullfile(projectDir, sprintf('sub-%s', subject), ...
 
 assert(exist(pth, 'dir')>0)
 
-if exist('dataFolder', 'var') && ~isempty(dataFolder)
-    datapath = fullfile(projectDir, 'derivatives', dataFolder, ...
+if usePreproc, datapath = fullfile(projectDir, 'derivatives', dataFolder, ...
         sprintf('sub-%s', subject), sprintf('ses-%s', session));
 else
     datapath = pth;
@@ -84,17 +85,19 @@ TR     = zeros(1,n);
 scan = 1;
 for ii = 1:length(tasks)
     for jj = 1:length(runnum{ii})
-                             
-        % Numvol (or numrows in design matrix)
-        [~, hdr] = bidsGetPreprocData(datapath, tasks(ii), {runnum{ii}(jj)});
-        numvol(scan) = hdr.ImageSize(end);
+              
         
         % TR
         if exist('tr', 'var') && ~isempty(tr)
             TR(scan)     = tr;            
         else
-            TR(scan) = bidsGetJSONval(datapath,tasks(ii), {runnum{ii}(jj)}, 'RepetitionTime');
+            tmp = bidsGetJSONval(datapath,tasks(ii), {runnum{ii}(jj)}, 'RepetitionTime');
+            TR(scan) = tmp{1};
         end
+        
+        % Numvol (or numrows in design matrix)
+        [~, hdr] = bidsGetPreprocData(datapath, tasks(ii), {runnum{ii}(jj)}, usePreproc);
+        numvol(scan) = hdr{1}.ImageSize(end);      
             
         % TSV
         prefix = sprintf('sub-%s_ses-%s_task-%s_run-%d', ...
@@ -123,7 +126,7 @@ num_conditions = length(unique_conditions);
 %   loop over all runs and make each matrix
 for ii = 1:n   
     
-    m = zeros(numrows(ii), num_conditions);
+    m = zeros(numvol(ii), num_conditions);
     these_conditions = T{ii}.trial_type;    
     [~,col_num] = ismember(these_conditions, unique_conditions);
     
