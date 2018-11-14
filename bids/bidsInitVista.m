@@ -57,6 +57,7 @@ if ~exist('analysisDir' , 'dir')
         sprintf('sub-%s',subject), sprintf('ses-%s',session));
 end
 assert(boolean(exist(analysisDir, 'dir')))
+cd(analysisDir);
 
 %% Whole brain reference
 % Set up file names and associated locations
@@ -80,7 +81,7 @@ if ~exist(fullfile(analysisDir,'3DAnatomy'),'dir')
         fs_ribbon2itk(subject, fullfile(anatomyPath, classFile));
     end
     % make sym link
-    str = sprintf('ln -s %s %s', anatomyPath , anatPath);
+    str = sprintf('ln -s %s %s', anatomyPath , '3DAnatomy');
     system(str)
 end
 
@@ -101,7 +102,7 @@ for ii = 1:length(d)
     epiFiles{ii} = d(ii).name;
     task   = bidsGet(d(ii).name,'task');
     runnum = bidsGet(d(ii).name,'run');
-    params.annotations{ii} = sprintf('task-%s-run-%s', task, runnum);
+    params.annotations{ii} = sprintf('task-%s_run-%s', task, runnum);
 end
 
 % Inplane (mean of unwarped, merged, distortion scan)
