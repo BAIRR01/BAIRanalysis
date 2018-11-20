@@ -29,19 +29,28 @@ for ii = 1:length(tasks)
         fprintf('.')
         
         if usePreproc
-            fnamePrefix  = sprintf('*_task-%s*run-*%d_preproc.nii*',...
+            fnamePrefix  = sprintf('*_task-%s*run-*%d_preproc*',...
                 tasks{ii},runnums{ii}(jj));
         else
-            fnamePrefix  = sprintf('*_task-%s*run-*%d_bold.nii*',...
+            fnamePrefix  = sprintf('*_task-%s*run-*%d_bold*',...
                 tasks{ii},runnums{ii}(jj));            
         end
         
         fname         = dir(fullfile(dataPath, fnamePrefix));
         assert(~isempty(fname));
         
-        data{scan}    = niftiread(fullfile (dataPath, fname.name));
-        info{scan}    = niftiinfo(fullfile (dataPath, fname.name));
-
+        [~, ~, ext] = fileparts(fname);
+        switch ext
+            case {'.nii' '.gz'}
+                data{scan}    = niftiread(fullfile (dataPath, fname.name));
+                info{scan}    = niftiinfo(fullfile (dataPath, fname.name));
+            case '.mgz'
+                mgz           = MRIread(fullfile (dataPath, fname.name));
+                data{scan}    = mgz.vol;
+                info{scan}    = rmfield(mgz, 'vol');
+            otherwise
+                error('Unrecognized file format %s', fname)
+        end
         scan          = scan+1;
     end
 end

@@ -160,6 +160,7 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %     % run it
 %     results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %         dataFolder, designFolder, stimdur, modelType, glmOptsPath, tr);
+
 %% Check inputs
 
 if ~exist('session', 'var'),     session = [];      end
