@@ -36,6 +36,14 @@ function bidsInitVista(projectDir, subject, session, tasks,... % runnums,
 % analysisDir = '/Volumes/server/Projects/BAIR/Analyses/tactilepilot/sub-wlsubj063/ses-nyu3t01'
 %
 % bidsInitVista(projectDir, subject, [] , [], [], analysisDir)
+%
+% Notes:
+%
+% If you are running this function on a host with Acadia mounted as something other than
+% /Volumes/server, then you should set the environment variable BAIR_ANATOMY_PATH to the
+% directory equivalent to /Volumes/server/Projects/Anatomy on Acadia (i.e., the path where
+% you store 3DAnatomy directories for VistaSoft).
+% 
 
 %% Check inputs
 
@@ -70,7 +78,13 @@ classPath  = fullfile('3DAnatomy', classFile);
 
 % Look for anatomy files and make them if they don't exist
 if ~exist(fullfile(analysisDir,'3DAnatomy'),'dir')
-    anatomyPath = fullfile('/Volumes/server/Projects/Anatomy',subject);
+    % Find the global anatomies directory
+    globAnatPath = getenv('BAIR_ANATOMY_PATH');
+    if isempty(globAnatPath), globAnatPath = '/Volumes/server/Projects/Anatomy'; end
+    if ~exist(globAnatPath, 'dir')
+        error('Could not find global BAIR anatomy path (expected %s)', globAnatPath);
+    end
+    anatomyPath = fullfile(globAnatPath,subject);
     if ~exist(anatomyPath, 'dir') ||~exist(fullfile(anatomyPath, anatFile), 'file')...
             && ~exist(fullfile(anatomyPath,classFile), 'file')
         mkdir (anatomyPath);
