@@ -39,26 +39,27 @@ for ii = 1:length(tasks)
         fname         = dir(fullfile(dataPath, fnamePrefix));
         assert(~isempty(fname));
         
-        if length(fname) == 1  || ...
-                length(fname) > 1 && length(unique ({fname.name})) > 1
-            for ll = 1:length(fname)
-                [~, ~, ext] = fileparts(fname(ll).name);
-                switch ext
-                    case {'.nii' '.gz'}
-                        data{scan}    = niftiread(fullfile (dataPath, fname(ll).name));
-                        info{scan}    = niftiinfo(fullfile (dataPath, fname(ll).name));
-                    case '.mgz'
-                        mgz           = MRIread(fullfile (dataPath, fname(ll).name));
-                        data{scan}    = mgz.vol;
-                        info{scan}    = rmfield(mgz, 'vol');
-                    otherwise
-                        error('Unrecognized file format %s', fname)
+        [~, ~, ext] = fileparts(fname(1).name);
+        switch ext
+            case {'.nii' '.gz'}
+                data{scan}    = niftiread(fullfile (dataPath, fname.name));
+                info{scan}    = niftiinfo(fullfile (dataPath, fname.name));
+            case '.mgz'
+                hemis = {'lh', 'rh'};
+                for ll = 1: length (hemis)
+                    % We index to make sure the order is always the same
+                    idx = contains ({fname.name} , hemis{ll});
+                    tempData(ll) = MRIread(fullfile (dataPath, fname(idx).name));
                 end
-                scan          = scan+1;
-            end
-        elseif length(fname) > 1 && length(unique ({fname.name})) == 1
-            error ('More than one file found using BIDS prefix: %s',fnamePrefix) 
+                
+                data{scan}    = cat(2,tempData(1).vol, tempData(2).vol);
+                info{scan}    = rmfield(tempData(1), 'vol');
+                
+            otherwise
+                error('Unrecognized file format %s', fname)
         end
+        scan          = scan+1;
     end
-    fprintf('\n')
+end
+fprintf('\n')
 end
