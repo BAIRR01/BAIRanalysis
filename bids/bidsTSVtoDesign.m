@@ -91,7 +91,7 @@ for ii = 1:length(tasks)
         if exist('tr', 'var') && ~isempty(tr)
             TR(scan)     = tr;            
         else
-            tmp = bidsGetJSONval(datapath,tasks(ii), {runnum{ii}(jj)}, 'RepetitionTime');
+            tmp = bidsGetJSONval(pth,tasks(ii), {runnum{ii}(jj)}, 'RepetitionTime');
             TR(scan) = tmp{1};
         end
         

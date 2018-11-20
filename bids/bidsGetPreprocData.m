@@ -9,8 +9,8 @@ function [data, info] = bidsGetPreprocData(dataPath, tasks, runnums, usePreproc)
 %                       default: true
 %
 % Output
-%   data:       the time-series data for each run with dimensions 
-%                X x Y x Z x time 
+%   data:       the time-series data for each run with dimensions
+%                X x Y x Z x time
 %   info:       nifti header for each run
 
 if ~exist('usePreproc', 'var') || isempty(usePreproc)
@@ -33,26 +33,32 @@ for ii = 1:length(tasks)
                 tasks{ii},runnums{ii}(jj));
         else
             fnamePrefix  = sprintf('*_task-%s*run-*%d_bold*',...
-                tasks{ii},runnums{ii}(jj));            
+                tasks{ii},runnums{ii}(jj));
         end
         
         fname         = dir(fullfile(dataPath, fnamePrefix));
         assert(~isempty(fname));
         
-        [~, ~, ext] = fileparts(fname);
-        switch ext
-            case {'.nii' '.gz'}
-                data{scan}    = niftiread(fullfile (dataPath, fname.name));
-                info{scan}    = niftiinfo(fullfile (dataPath, fname.name));
-            case '.mgz'
-                mgz           = MRIread(fullfile (dataPath, fname.name));
-                data{scan}    = mgz.vol;
-                info{scan}    = rmfield(mgz, 'vol');
-            otherwise
-                error('Unrecognized file format %s', fname)
+        if length(fname) == 1  || ...
+                length(fname) > 1 && length(unique ({fname.name})) > 1
+            for ll = 1:length(fname)
+                [~, ~, ext] = fileparts(fname(ll).name);
+                switch ext
+                    case {'.nii' '.gz'}
+                        data{scan}    = niftiread(fullfile (dataPath, fname(ll).name));
+                        info{scan}    = niftiinfo(fullfile (dataPath, fname(ll).name));
+                    case '.mgz'
+                        mgz           = MRIread(fullfile (dataPath, fname(ll).name));
+                        data{scan}    = mgz.vol;
+                        info{scan}    = rmfield(mgz, 'vol');
+                    otherwise
+                        error('Unrecognized file format %s', fname)
+                end
+                scan          = scan+1;
+            end
+        elseif length(fname) > 1 && length(unique ({fname.name})) == 1
+            error ('More than one file found using BIDS prefix: %s',fnamePrefix) 
         end
-        scan          = scan+1;
     end
-end
-fprintf('\n')
+    fprintf('\n')
 end
