@@ -51,7 +51,6 @@ for ii = 1:length(tasks)
                     idx = contains ({fname.name} , hemis{ll});
                     tempData(ll) = MRIread(fullfile (dataPath, fname(idx).name));
                 end
-                
                 data{scan}    = cat(2,tempData(1).vol, tempData(2).vol);
                 info{scan}    = rmfield(tempData(1), 'vol');
                 
