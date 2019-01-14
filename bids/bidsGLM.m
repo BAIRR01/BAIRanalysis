@@ -28,10 +28,11 @@ function results = bidsGLM(projectDir, subject, session, tasks, runnums, ...
 %                               <subject>/<session>/*.nii
 %                           default: 'preprocessed'
 %     designFolder:     folder name containing design matrices for glmDenoise
-%                           Note that this folder should reside in 
-%                               <projectDir>/derivatives/design_matrices/<subject>/<session>/
+%                           This specifies that the design matrices
+%                           for each subject reside in
+%                               <projectDir>/derivatives/design_matrices/<designFolder>/<subject>/<session>/
 %                           and should contain either .tsv or .mat files
-%                           default = [], which means no subfolder inside
+%                           default = [], which means no subfolder:
 %                               <projectDir>/derivatives/design_matrices/<subject>/<session>/
 %     stimdur:          duration of trials in seconds
 %                           default = tr;
