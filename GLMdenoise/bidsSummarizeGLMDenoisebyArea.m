@@ -138,13 +138,13 @@ if makeFigures
     for ll = 1:length(bensonAreaLabels)
         f = figure('Name', bensonAreaLabels{ll});
         
-        bar(meanBeta(ll,conditionsToUse)), hold on
-        errorbar(meanBeta(ll,conditionsToUse), meanBetaSE(ll,conditionsToUse),'LineStyle','none')
-        xticks(1: sum(conditionsToUse))
+        bar(meanBeta(ll,GLMconditions)), hold on
+        errorbar(meanBeta(ll,GLMconditions), meanBetaSE(ll,GLMconditions),'LineStyle','none')
+        xticks(1: sum(GLMconditions))
         xticklabels([])
         title (bensonAreaLabels{ll})
         ylabel ('BW')
-        xticklabels(GLMconditions(conditionsToUse))
+        xticklabels(GLMconditions)
         xtickangle (45)
         set(f, 'Position', (f.Position.*[1 1 1.5 2]))
         
