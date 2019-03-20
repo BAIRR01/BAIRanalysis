@@ -1,7 +1,44 @@
 function bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
-    tasks, conditionsOfInterest, saveFigures, imDir, plotAllConditions, plotGroupAvg)
+    tasks, conditionsOfInterest, saveFigures, imFolder, plotAllConditions, plotGroupAvg)
 % bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, [sessions],...
 %     [tasks], [conditionsOfInterest], [saveFigures],[plotAllConditions])
+%
+% summarizeGLMDenoisebyArea (projectDir , subject, modelType, [session],...
+%   [tasks], [conditionsOfInterest], [makeFigures], [saveFigures])
+%
+% Required input:
+%
+%   projectDir  : path where the BIDS projects lies (string)
+%   subjects    : BIDS subject name (string, all lower case)
+%   modelTypes  : name of folder containing outputs of GLMdenoised 
+%
+% Optional input:
+%
+%   sessions             : BIDS session names 
+%   tasks                : The tasks used for running the GLM
+%                               default : use all tasks 
+%                                   (HRF, temporalpattern, spatialpattern, spatialobject)
+%                               Note: The total number of conditions should
+%                               matchn the number of columns in design matrices
+%                               used for GLM
+%   saveFigures          : 0 = don't save figures, 1 = save figures (default: 0)
+%   imFolder             : name of folder to save plots (will be within GLMdenoise folder)
+%                               default = modelTypes      
+%   conditionsOfInterest : one or more types experimental conditions used
+%                           for thresholding (string or cell array of strings)
+%                               default: uses all conditions
+%   plotAllConditions    : Whether to plot all tasks/conditions
+%                             default : true - will plot all conditions
+%                                           used in running GLMdenoise 
+%                              Note if false:
+%                               If conditions of interest are provided,
+%                               only those conditions will be plotted If no
+%                               conditions of interest are provided, but
+%                               tasks are provided, conditions in those
+%                               tasks will be plotted 
+%   plotGroupAverage     : will take the average of all subjects provided
+%                              and compute a standard error of this mean
+%                                   default : false
 %
 % Computes the mean betaweights using function summarizeGLMDenoisebyArea
 % and then plots the data in various ways
@@ -25,9 +62,10 @@ function bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
 % tasks = {'temporalpattern'};
 % saveFigures = 0;
 % plotAllConditions = true
+% imFolder = {'roundedTR_12', 'upsampled_12'};
 %
 % bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
-%     tasks, conditionsOfInterest, saveFigures)
+%     tasks, conditionsOfInterest, saveFigures, imFolder)
 
 % Set ROI labels and load some stimulus conditions
 [~, ~, ~, bensonAreaLabels] = roisFromAtlas(subjects{1});
@@ -37,10 +75,6 @@ load('designMatrixConditions.mat', 'allConditions', 'temporalpattern',...
 
 
 %% check for inputs and set defaults
-if ~exist ('imDir', 'var' )|| isempty(imDir)
-    imDir = fullfile(projectDir, 'derivatives','GLMdenoise', 'summaryFigures');
-end
-if ~exist(imDir, 'dir' ), mkdir(imDir), end
 if ~exist ('plotGroupAvg', 'var' )|| isempty(plotGroupAvg)
     plotGroupAvg = false;
 end
@@ -71,10 +105,17 @@ end
 %% figure out what to compute, then plot it
 for mm = 1:length(modelTypes)
     modelType = modelTypes{mm};
+    
+    % set a dirctory for saving images
+    if ~exist ('imFolder', 'var' )|| isempty(imFolder),saveFolder =  modelTypes{mm}; end
+    if length(imFolder) > 1, saveFolder = imFolder{mm}; else saveFolder = char(imFolder); end
+    imDir = fullfile(projectDir, 'derivatives','GLMdenoise', 'summaryFigures', saveFolder);
+    if ~exist(imDir, 'dir' ), mkdir(imDir), end
+    
+    %loop through subjects and compute the means and standard errors
     for ii = 1:length(subjects)
         subject = subjects{ii};
         if ~skip, session = sessions{ii}; end
-        % compute the
         [meanBeta{ii} , stErr{ii}, GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,session,tasks, conditionsOfInterest);
     end
     
@@ -86,7 +127,7 @@ for mm = 1:length(modelTypes)
                 end
                 groupMn{1}(a,c) = mean(temp);
                 groupStErr{1}(a,c) = std(temp)/sqrt(length(temp));
-            end 
+            end
         end
         subjects = {'GroupAvg'};
         meanBeta = groupMn;

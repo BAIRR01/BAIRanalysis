@@ -1,4 +1,4 @@
-function [meanBeta,meanBetaSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,...
+function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,...
     session,tasks, conditionsOfInterest, makeFigures, saveFigures)
 % Computes and plots a mean beta weight for each stimulus condition and
 %   visual area using GLM denoise results from surface time-series
@@ -33,7 +33,7 @@ function [meanBeta,meanBetaSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (
 %   subject    = 'wlsubj048';
 %   modelType  = 'upsampledToSurfaceAssumeHRF';
 %
-%   summarizeGLMDenoisebyArea (projectDir , subject, modelType);
+%   bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType);
 %
 % example 2:
 %
@@ -42,7 +42,7 @@ function [meanBeta,meanBetaSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (
 %   modelType            = 'upsampledToSurfaceAssumeHRF';
 %   conditionsOfInterest = ["crf", "onepulse", "twopulse"];
 %
-%   summarizeGLMDenoisebyArea (projectDir , subject, modelType, [], [], conditionsOfInterest);
+%   bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType, [], [], conditionsOfInterest);
 %
 %
 
@@ -74,8 +74,8 @@ files = dir(fullfile(resultsDir,'*results.mat'));
 load(fullfile(resultsDir, files(1).name), 'results');
 
 % get beta weights and R2 from GLM denoise results
-betasmn = squeeze(results.modelmd{2});
-%betasse = sqrt(sum(squeeze(results.modelse{2}).^2,2));
+betasmd = squeeze(results.modelmd{2});
+betas   = squeeze(results.models{2});
 R2      = results.R2';
 clear results;
 
@@ -94,14 +94,14 @@ else
         if  contains(tasks , experiments{tt}, 'IgnoreCase',true)
             tmp = eval(experiments{tt});
             GLMconditions = [GLMconditions tmp];
-        else
+        else %do nothing
         end
     end
 end
  
 % Use all conditions, or find conditions that match 'conditionsOfInterest'
 if ~exist('conditionsOfInterest', 'var') || isempty(conditionsOfInterest)
-    conditionsToUse = 1:size(betasmn,2);
+    conditionsToUse = ones(1,size(betasmd,2));
 else
     conditionsToUse = contains(GLMconditions, conditionsOfInterest, 'IgnoreCase',true);
 end
@@ -112,12 +112,15 @@ end
 eccenLmt = bh.eccen > 1 & bh.eccen < 8;
 
 % set all negative beta weights to NaN
-negativeBetas = mean(betasmn(:,conditionsToUse),2)<0;
-betasmn(negativeBetas,:) = nan;
+negativeBetas = mean(betasmd(:,conditionsToUse),2)<0;
+betasmd(negativeBetas,:) = nan;
+negativeBetasSE = squeeze(mean(betas(:,conditionsToUse,:),2)<0);
+betas(negativeBetasSE(1),:,negativeBetasSE(2)) = nan;
 
 % Find all vertices with an R2 less than 2% and set them to NaN
 idx = R2 < 2;
-betasmn(idx, :) = nan;
+betasmd(idx, :) = nan;
+betas(idx,:,:)  = nan;
 
 % meanBeta is a matrix of beta weights, n x m, where n is the number of
 %   ROIs and m is the number of stimulus conditions
@@ -125,11 +128,9 @@ betasmn(idx, :) = nan;
 % Loop through visual areas and average beta weights for each condition
 for ii = 1:(length(unique(bh.varea))-1)
     indices =  eccenLmt & bh.varea == ii;
-    
+    betasSE(ii,:)  = std(squeeze(nanmean(betas(indices, :,:))), [], 2)';
     for jj = 1: length(GLMconditions)
-        meanBeta(ii,jj) = nanmean(betasmn(indices, jj));
-        meanBetaSE(ii,jj) = nanstd(betasmn(indices, jj))/...
-            sqrt(length(find(~isnan(betasmn(indices, jj)))));
+        meanBeta(ii,jj) = nanmean(betasmd(indices, jj));
     end
 end
 
@@ -138,9 +139,9 @@ if makeFigures
     for ll = 1:length(bensonAreaLabels)
         f = figure('Name', bensonAreaLabels{ll});
         
-        bar(meanBeta(ll,GLMconditions)), hold on
-        errorbar(meanBeta(ll,GLMconditions), meanBetaSE(ll,GLMconditions),'LineStyle','none')
-        xticks(1: sum(GLMconditions))
+        bar(meanBeta(ll,:)), hold on
+        errorbar(meanBeta(ll,:), betasSE(ll,:),'LineStyle','none')
+        xticks(1:length(GLMconditions))
         xticklabels([])
         title (bensonAreaLabels{ll})
         ylabel ('BW')
