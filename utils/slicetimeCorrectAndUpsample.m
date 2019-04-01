@@ -73,6 +73,23 @@ for thistask = 1:length(tasks)
         end
         fprintf('\n')
         
+        % Debug:
+        %         dims = size(data);
+        %         d1 = reshape(data, dims(1)*dims(2), dims(3), []);
+        %         d2 = reshape(dataUpsampled, dims(1)*dims(2), dims(3), []);
+        %         d1mean = squeeze(mean(d1))';
+        %         d2mean = squeeze(mean(d2))';
+        %         figure(1), clf;
+        %         for ii =1:size(d1mean,2)
+        %             subplot(5,6,ii)
+        %             plot(t, d1mean(:,ii), 'k-', t2-st(ii), d2mean(:,ii), 'r--', t2, d2mean(:,ii), 'b-', 'LineWidth',2)
+        %             xlim([100 105])
+        %             title(sprintf('Slice time %3.2f s', st(ii)));
+        %         end
+        %         figure(2), plot(t, mean(d1mean,2), 'o-', t2-mean(st), ...
+        %         mean(d2mean,2), 'x--');  xlim([100 105])
+        
+        
         % 'sub-som682_ses-nyu3t01_task-hrf_run-1_preproc.nii.gz'
         [p, f, e] = fileparts(hdr.Filename);
         niftiwrite(dataUpsampled, fullfile(dataPathOut, f),'Compressed',true);
