@@ -134,31 +134,31 @@ for mm = 1:length(modelTypes)
         stErr = groupStErr;
     end
     
-    % For each visual area, make a subplot for each subject across all stimulus GLMconditions
-    for ll = 1:length(bensonAreaLabels)
-        f =  figure('Name', sprintf('%s',bensonAreaLabels{ll}));
-        
-        for jj = 1:length(subjects)
-            subplot(length(subjects),1, jj)
-            bar(meanBeta{jj}(ll,:))
-            hold on
-            errorbar(meanBeta{jj}(ll,:),stErr{jj}(ll,:),'LineStyle','none')
-            title(sprintf('%s',subjects{jj}))
-            xticks(1: length(GLMconditions))
-            xticklabels([])
-            ylabel ('BW')
-            
-        end
-        set(f, 'Position', (f.Position.*[1 1 1.5 2]))
-        xticklabels(GLMconditions)
-        xlabel('Condition')
-        xtickangle(45)
-        
-        % Save it
-        if(saveFigures)
-            print (fullfile(imDir,sprintf('%s_AvgBetaWeight',bensonAreaLabels{ll})),'-dpng')
-        end
-    end
+%     % For each visual area, make a subplot for each subject across all stimulus GLMconditions
+%     for ll = 1:length(bensonAreaLabels)
+%         f =  figure('Name', sprintf('%s',bensonAreaLabels{ll}));
+%         
+%         for jj = 1:length(subjects)
+%             subplot(length(subjects),1, jj)
+%             bar(meanBeta{jj}(ll,:))
+%             hold on
+%             errorbar(meanBeta{jj}(ll,:),stErr{jj}(ll,:),'LineStyle','none')
+%             title(sprintf('%s',subjects{jj}))
+%             xticks(1: length(GLMconditions))
+%             xticklabels([])
+%             ylabel ('BW')
+%             
+%         end
+%         set(f, 'Position', (f.Position.*[1 1 2 2]))
+%         xticklabels(GLMconditions)
+%         xlabel('Condition')
+%         xtickangle(45)
+%         linkaxes(f.Children,'y')
+%         % Save it
+%         if(saveFigures)
+%             print (fullfile(imDir,sprintf('%s_AvgBetaWeight',bensonAreaLabels{ll})),'-dpng')
+%         end
+%     end
     
     % For each visual area, make a subplot for each subject and stimulus subset
     for ll = 1:length (bensonAreaLabels)
@@ -181,8 +181,8 @@ for mm = 1:length(modelTypes)
             end
         end
         
-        
-        set(f, 'Position', (f.Position.*[1 1 1.5 2]))
+        linkaxes(f.Children,'y')
+        set(f, 'Position', (f.Position.*[1 1 2 2]))
         % Save it
         if(saveFigures)
             print (fullfile(imDir,sprintf('%s_acrossSubjs_AvgBetaWeight',...
@@ -195,16 +195,17 @@ for mm = 1:length(modelTypes)
         for ii = 1:length(conditionsToPlot)
             f = figure('Name', sprintf('%s',subjects{jj}));
             idx = contains (GLMconditions, conditionsToPlot{ii});
-            
-            for ll = 1:length (bensonAreaLabels)
-                subplot (3, 4, ll)
+           
+            for ll = 1:length(bensonAreaLabels) 
+                subplot (3, 4, ll) %subplot (3, 4, ll)
                 bar(meanBeta{jj}(ll,idx))
                 hold on
                 errorbar(meanBeta{jj}(ll,idx),stErr{jj}(ll,idx),'LineStyle','none')
                 xticks(1: length(conditionsToPlot{ii}))
                 title (bensonAreaLabels{ll})
+              %  ylabel ('Avg BetaWeight')
                 
-                if ll == 1 || 5 || 9; ylabel ('BW'); end
+                if ll == 1 || ll == 5 || ll == 9; ylabel ('Avg BetaWeight'); end
                 
                 if any(ll == 9:12)
                     xticklabels(conditionsToPlot{ii})
@@ -213,9 +214,13 @@ for mm = 1:length(modelTypes)
                 else
                     xticklabels([])
                 end
+                
             end
-            set(f, 'Position', (f.Position.*[1 1 1.5 2]))
-            
+%             xticklabels(conditionsToPlot{ii})
+%             xlabel('Condition')
+%             xtickangle(45)
+            set(f, 'Position', (f.Position.*[1 1 2 2]))
+           % linkaxes(f.Children,'y')
             %save it
             if(saveFigures)
                 print (fullfile(imDir,sprintf('sub-%s_stimSubset-%d_AvgBW',...
@@ -224,5 +229,5 @@ for mm = 1:length(modelTypes)
         end
     end
     clear meanBeta stErr
-    close all
+    %close all
 end

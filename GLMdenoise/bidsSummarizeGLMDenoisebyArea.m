@@ -91,7 +91,7 @@ else
     %loop through the experiments to make sure the condition order is
     %correct and the same as our design matrices
     for tt = 1:length(experiments)
-        if  contains(tasks , experiments{tt}, 'IgnoreCase',true)
+        if  any(contains(tasks , experiments{tt}, 'IgnoreCase',true))
             tmp = eval(experiments{tt});
             GLMconditions = [GLMconditions tmp];
         else %do nothing
