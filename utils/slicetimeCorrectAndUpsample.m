@@ -35,7 +35,7 @@ for thistask = 1:length(tasks)
         st = bidsGetJSONval(rawDataPath,tasks(thistask), {thisrun}, 'SliceTiming');
         
         % Pre-processed data
-        [data, hdr] = bidsGetPreprocData(dataPathIn, tasks(thistask), {thisrun});
+        [~ , hdr,data] = bidsGetPreprocData(dataPathIn, tasks(thistask), {thisrun});
 
         % Because we are doing one run at a time...
         tr = tr{1}; st = st{1}; data = data{1}; hdr = hdr{1};
