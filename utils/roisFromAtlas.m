@@ -1,4 +1,16 @@
-function [lh, rh, bh, bensonAreaLabels, wangAreaLabels] = roisFromAtlas(subject)
+function [lh, rh, bh, bensonAreaLabels, wangAreaLabels] = roisFromAtlas(subject, projectDir, isfmriprep)
+% roisFromAtlas(subject, [projectDir],[isfmriprep])
+% 
+% Inputs: 
+%     subject         : Subject ID (String)
+%     projectDir      : The optional project level directory. If provided,
+%                           code assumes this is an fMRIprep project and
+%                           will assume the freesurfer directory in the
+%                           derivatives folder. (String)
+%                           Default: gets the freesurfer directory environment variable
+%     isfmriprep      :  whether to assume an fMRIprep folder structure (boolean)
+%                           Default: False
+% 
 % Gets the following from the the subjects freesurfer directory:
 %       - Benson 2014 Atlas
 %       - Benson 2014 eccentricity maps
@@ -13,6 +25,9 @@ function [lh, rh, bh, bensonAreaLabels, wangAreaLabels] = roisFromAtlas(subject)
 if ~exist('subject', 'var') || isempty(subject)
     error('Subject ID is a required input')
 end
+if ~exist('isfmriprep', 'var') || isempty(isfmriprep)
+    isfmriprep = false;
+end
 
 % Set ROI labels
 bensonAreaLabels = {'V1','V2','V3','hV4','VO1', 'VO2','LO1', 'LO2', 'TO1',...
@@ -21,8 +36,12 @@ bensonAreaLabels = {'V1','V2','V3','hV4','VO1', 'VO2','LO1', 'LO2', 'TO1',...
 wangAreaLabels = {'V1v','V1d', 'V2v','V2d','V3v','V3d', 'hV4', 'VO1','VO2',...
      'PHC1','PHC2','TO2','TO1','LO2','LO1', 'V3b','V3a', 'IPS0','IPS1','IPS2',...
      'IPS3','IPS4','IPS5','SPL1','FEF'};
-
-fsPth = getenv('SUBJECTS_DIR');
+ if isfmriprep
+     fsPth   = fullfile(projectDir, 'derivatives', 'freesurfer');
+     subject = sprintf('sub-%s', subject);
+ else
+     fsPth = getenv('SUBJECTS_DIR');
+ end
 
 lh.varea = MRIread(fullfile(fsPth, subject, 'surf', 'lh.benson14_varea.mgz'));
 rh.varea = MRIread(fullfile(fsPth, subject, 'surf', 'rh.benson14_varea.mgz'));

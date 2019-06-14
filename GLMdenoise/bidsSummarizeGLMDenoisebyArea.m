@@ -1,5 +1,5 @@
 function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,...
-    session,tasks, conditionsOfInterest, makeFigures, saveFigures)
+    session,tasks, conditionsOfInterest, makeFigures, saveFigures, isfmriprep)
 % Computes and plots a mean beta weight for each stimulus condition and
 %   visual area using GLM denoise results from surface time-series
 %
@@ -21,11 +21,12 @@ function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (pro
 %                               Note: The total number of conditions should
 %                               matchn the number of columns in design matrices
 %                               used for GLM
-%   saveFigures          : 0 = don't save figures, 1 = save figures (default: 0)
+%   saveFigures          : 0 = don't save figures, 1 = save figures (default: false)
 %   conditionsOfInterest : one or more types experimental conditions used
 %                           for thresholding (string or cell array of strings)
 %                               default: uses all conditions
-%   makeFigures          : 0 = don't make a plot in this function (default: 0)
+%   makeFigures          : 0 = don't make a plot in this function (default: false)
+%   isfmriprep           : whether project is an fMRIprep project
 %
 % example 1:
 %
@@ -67,7 +68,7 @@ resultsDir = fullfile(projectDir, 'derivatives','GLMdenoise', modelType,...
 %% Load Data, find stimulus conditions and set ROI labels
 
 % load in ROIs from Benson and Wang Atlases
-[~, ~, bh, bensonAreaLabels] = roisFromAtlas(subject);
+[~, ~, bh, bensonAreaLabels] = roisFromAtlas(subject, projectDir, isfmriprep);
 
 % load in GLM Denoised results
 files = dir(fullfile(resultsDir,'*results.mat'));
