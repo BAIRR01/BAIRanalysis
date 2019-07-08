@@ -1,5 +1,5 @@
 function bidsPreprocToUpsampledToGLMdenoise (projectDir, subject, session, tasks , ...
-    runnums, dataStr, upsample, upsampleFactor,upsampleFolder, dataFolder,makeDesign, designFolder,modelType, glmOptsPath)
+    runnums, dataStr, upsample, upsampleFactor,upsampleFolder, dataFolder,makeDesign, designFolder,tr,modelType, glmOptsPath)
 %
 % bidsPreprocToUpsampledToGLMdenoise (projectDir, subject, [session], [tasks] , ...
 %     [runnums], dataStr, upsample, [upsampleFactor],[upsampleFolder], dataFolder,...
@@ -17,6 +17,7 @@ function bidsPreprocToUpsampledToGLMdenoise (projectDir, subject, session, tasks
 %     dataFolder        = 'fmriprepUpsampled';
 %     makeDesign        = true;
 %     designFolder      = 'temporalpatternUpsampled';
+%     tr                = .85/upsampleFactor;
 %     modelType         = 'temporalpatternUpsampled';
 %     upsample          = true;
 %     glmOptsPath       = [];
@@ -40,8 +41,6 @@ end
 % Upsample the data
 if upsample
     bidsUpsampleGiftis (projectDir, subject, session ,tasks, upsampleFactor, dataStr, upsampleFolder)
-    
-    tr  = .85/upsampleFactor;
 end
 
 % Make design matrices
@@ -59,9 +58,10 @@ bidsGLM(projectDir, subject, session, tasks, runnums, ...
 conditionsOfInterest = [];
 makeFigures          = true;
 saveFigures          = false;
+isfmriprep           = true;
 
 bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,...
-    session,tasks, conditionsOfInterest, makeFigures, saveFigures);
+    session,tasks, conditionsOfInterest, makeFigures, saveFigures, isfmriprep);
 
 % process the GLMdenoise figures for viewing
 figDir = fullfile(projectDir,'derivatives', 'GLMdenoise' ,modelType, sprintf('sub-%s',subject), sprintf('ses-%s', session),'figures');
