@@ -88,7 +88,7 @@ for ii = 1:length(tasks)
             end
             mri.vol = double(dataUpsampled);
             
-            upsmpldFname = lower(sprintf('%sh.sub-%s_ses-%s_task-%s_run-%d_%s_preproc.mgz',hemis{ll}, subject, session, tasks{ii}, runnums{ii}(jj),dataStr));
+            upsmpldFname = lower(sprintf('%sh.sub-%s_ses-%s_task-%s_run-%02d_%s_preproc.mgz',hemis{ll}, subject, session, tasks{ii}, runnums{ii}(jj),dataStr));
             
             %write data
             fprintf('Writing...\n')
