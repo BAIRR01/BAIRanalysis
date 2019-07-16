@@ -17,7 +17,7 @@ function bidsPlotDatagloveData (projectDir, subject, session, tasks, useBlockMea
 %   useBlockMeans = 'true'; 
 %   saveFigs      = 'true';
 %
-% plotDatagloveData (projectDir, subject, session, tasks, saveFigs)
+% plotDatagloveData (projectDir, subject, session, tasks, useBlockMeans, saveFigs)
 
 
 fingerOrder = {'thumb', 'index', 'middle', 'ring', 'little'};
@@ -96,7 +96,7 @@ for ii = 1: length(tasks)
                 end
             end
             
-        case 'fingermappingright' 
+        case {'fingermappingright' , 'fingermappingleft'}
             % the order is the same for both MEG, ECoG and fMRI
             allMovements      = stimulus.tsv.trial_name;
             events            = stimulus.seq;
