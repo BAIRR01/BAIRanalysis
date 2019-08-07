@@ -6,7 +6,7 @@ function bidsPreprocToUpsampledToGLMdenoise (projectDir, subject, session, tasks
 %      makeDesign, designFolder,modelType, [glmOptsPath])
 %
 % Example 1:
-%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual_BIDS_compatible';
+%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual_BIDS_compatible/visual';
 %     subject           = 'umcuchaam';
 %     upsampleFactor    = 5;
 %     dataStr           = 'fsnative';

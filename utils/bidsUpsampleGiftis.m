@@ -63,7 +63,7 @@ for ii = 1:length(tasks)
         for ll = 1: length (hemis)
             % We index to make sure the order is always the same
             idx = contains ({fname.name} , sprintf('hemi-%s',hemis{ll}), 'IgnoreCase', true);
-            fprintf('Loading gifti: task-%s_run-%d %s hemisphere...\n', tasks{ii}, runnums{ii}(jj), hemis{ll})
+            fprintf('Loading gifti: task-%s_run-%02d %s hemisphere...\n', tasks{ii}, runnums{ii}(jj), hemis{ll})
             g = gifti(fullfile (dataPath, fname(idx).name));
             data = g.cdata;
             sz = size(data);

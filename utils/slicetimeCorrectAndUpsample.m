@@ -1,11 +1,12 @@
 % For BIDS organized data with seperate directories for Raw, Preprocessed
 % and Analysis data
-subject         = 'wlsubj048';
+subject         = 'wlsubj097';
 session         = 'nyu3t01';
 tasks           = {'hrf' 'spatialobject' 'spatialpattern' 'temporalpattern'};%
 dataFolderIn    = 'preprocessed';
 dataFolderOut   = 'preprocessedUpsampled';
 upsampleFactor  = 5;
+datastr         = 'preproc';
 
 % Bids project, subject and session context
 projectDir     = '/Volumes/server/Projects/BAIR/Data/BIDS/visual/';
@@ -35,7 +36,7 @@ for thistask = 1:length(tasks)
         st = bidsGetJSONval(rawDataPath,tasks(thistask), {thisrun}, 'SliceTiming');
         
         % Pre-processed data
-        [~ , hdr,data] = bidsGetPreprocData(dataPathIn, tasks(thistask), {thisrun});
+        [~ , hdr,data] = bidsGetPreprocData(dataPathIn,datastr, tasks(thistask), {thisrun});
 
         % Because we are doing one run at a time...
         tr = tr{1}; st = st{1}; data = data{1}; hdr = hdr{1};

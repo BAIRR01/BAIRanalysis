@@ -1,5 +1,5 @@
 function bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
-    tasks, conditionsOfInterest, saveFigures, imFolder, plotAllConditions, plotGroupAvg)
+    tasks, conditionsOfInterest, saveFigures, imFolder, plotAllConditions, plotGroupAvg, isfmriprep)
 % bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, [sessions],...
 %     [tasks], [conditionsOfInterest], [saveFigures],[plotAllConditions])
 %
@@ -68,7 +68,7 @@ function bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
 %     tasks, conditionsOfInterest, saveFigures, imFolder)
 
 % Set ROI labels and load some stimulus conditions
-[~, ~, ~, bensonAreaLabels] = roisFromAtlas(subjects{1});
+[~, ~, ~, bensonAreaLabels] = roisFromAtlas(subjects{1},projectDir, isfmriprep);
 
 load('designMatrixConditions.mat', 'allConditions', 'temporalpattern',...
     'spatialobject', 'spatialpattern', 'conditionSubsets');
@@ -116,7 +116,7 @@ for mm = 1:length(modelTypes)
     for ii = 1:length(subjects)
         subject = subjects{ii};
         if ~skip, session = sessions{ii}; end
-        [meanBeta{ii} , stErr{ii}, GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,session,tasks, conditionsOfInterest);
+        [meanBeta{ii} , stErr{ii}, GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,session,tasks, conditionsOfInterest, [],[], isfmriprep);
     end
     
     if plotGroupAvg
@@ -134,7 +134,7 @@ for mm = 1:length(modelTypes)
         stErr = groupStErr;
     end
     
-%     % For each visual area, make a subplot for each subject across all stimulus GLMconditions
+    %     % For each visual area, make a subplot for each subject across all stimulus GLMconditions
 %     for ll = 1:length(bensonAreaLabels)
 %         f =  figure('Name', sprintf('%s',bensonAreaLabels{ll}));
 %         
@@ -228,6 +228,6 @@ for mm = 1:length(modelTypes)
             end
         end
     end
-    clear meanBeta stErr
+    %clear meanBeta stErr
     %close all
 end

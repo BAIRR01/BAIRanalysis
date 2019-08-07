@@ -31,7 +31,7 @@ for ii = 1: length(tasks)
     endIdx = find(contains(datagloveSampleTimes, sprintf('%s_%s_%s', time{1}, time{2}, time{3})));
     % we don't know exactly when it happened, so assume the middle of the range
     num = round(length(endIdx)/2); 
-        
+    
     % use that index and place the values into the stim file
     response.glove = datagloveRaw(endIdx(num)-length(stimulus.seq):endIdx(num),:);
     response.datagloveSampleTime = datagloveSampleTimes(endIdx(num)-length(stimulus.seq):endIdx(num),:);
