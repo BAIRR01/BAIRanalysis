@@ -50,7 +50,6 @@ end
 
 % Run GLM denoise
 stimdur           = [];
-
 bidsGLM(projectDir, subject, session, tasks, runnums, ...
     dataFolder, dataStr, designFolder, stimdur, modelType, glmOptsPath, tr)
 
