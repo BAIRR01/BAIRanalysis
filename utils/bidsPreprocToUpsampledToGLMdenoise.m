@@ -6,7 +6,7 @@ function bidsPreprocToUpsampledToGLMdenoise (projectDir, subject, session, tasks
 %      makeDesign, designFolder,modelType, [glmOptsPath])
 %
 % Example 1:
-%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual_BIDS_compatible/visual';
+%     projectDir        = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
 %     subject           = 'umcuchaam';
 %     upsampleFactor    = 5;
 %     dataStr           = 'fsnative';
@@ -60,8 +60,8 @@ makeFigures          = true;
 saveFigures          = false;
 isfmriprep           = true;
 
-bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,...
-    session,tasks, conditionsOfInterest, makeFigures, saveFigures, isfmriprep);
+ bidsSummarizeGLMDenoisebyArea (projectDir,isfmriprep,...
+    modelType, subject,session,tasks,conditionsOfInterest, makeFigures, saveFigures)
 
 % process the GLMdenoise figures for viewing
 figDir = fullfile(projectDir,'derivatives', 'GLMdenoise' ,modelType, sprintf('sub-%s',subject), sprintf('ses-%s', session),'figures');

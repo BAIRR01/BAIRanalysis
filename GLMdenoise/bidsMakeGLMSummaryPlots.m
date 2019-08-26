@@ -1,44 +1,44 @@
-function bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
-    tasks, conditionsOfInterest, saveFigures, imFolder, plotAllConditions, plotGroupAvg, isfmriprep)
-% bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, [sessions],...
-%     [tasks], [conditionsOfInterest], [saveFigures],[plotAllConditions])
+function bidsMakeGLMSummaryPlots(projectDir,isfmriprep,modelTypes, subjects, sessions,...
+    tasks, conditionsOfInterest, plotAllConditions, plotGroupAvg, saveFigures, imFolder)
 %
-% summarizeGLMDenoisebyArea (projectDir , subject, modelType, [session],...
-%   [tasks], [conditionsOfInterest], [makeFigures], [saveFigures])
+% bidsMakeGLMSummaryPlots(projectDir,isfmriprep,modelTypes, subjects, [sessions],...
+%     [tasks], [conditionsOfInterest], [plotAllConditions], [plotGroupAvg], [saveFigures], [imFolder])
+%
+%   see also: summarizeGLMDenoisebyArea
 %
 % Required input:
-%
-%   projectDir  : path where the BIDS projects lies (string)
-%   subjects    : BIDS subject name (string, all lower case)
-%   modelTypes  : name of folder containing outputs of GLMdenoised 
+%   projectDir : path where the BIDS projects lies (string)
+%   subjects   : BIDS subject names (array of string, all lower case)
+%   modelType  : name of folder containing outputs of GLMdenoised (string)
+%   isfmriprep : whether project is an fMRIprep project (boolean)
 %
 % Optional input:
 %
-%   sessions             : BIDS session names 
+%   sessions             : BIDS session names (array of strings, all lower case)
 %   tasks                : The tasks used for running the GLM
-%                               default : use all tasks 
-%                                   (HRF, temporalpattern, spatialpattern, spatialobject)
+%                               default : use three tasks
+%                                   (temporalpattern, spatialpattern, spatialobject)
 %                               Note: The total number of conditions should
 %                               matchn the number of columns in design matrices
 %                               used for GLM
-%   saveFigures          : 0 = don't save figures, 1 = save figures (default: 0)
-%   imFolder             : name of folder to save plots (will be within GLMdenoise folder)
-%                               default = modelTypes      
 %   conditionsOfInterest : one or more types experimental conditions used
 %                           for thresholding (string or cell array of strings)
 %                               default: uses all conditions
 %   plotAllConditions    : Whether to plot all tasks/conditions
 %                             default : true - will plot all conditions
-%                                           used in running GLMdenoise 
+%                                           used in running GLMdenoise
 %                              Note if false:
 %                               If conditions of interest are provided,
 %                               only those conditions will be plotted If no
 %                               conditions of interest are provided, but
 %                               tasks are provided, conditions in those
-%                               tasks will be plotted 
-%   plotGroupAverage     : will take the average of all subjects provided
+%                               tasks will be plotted
+%   plotGroupAvg         : will take the average of all subjects provided
 %                              and compute a standard error of this mean
 %                                   default : false
+%   saveFigures          : 0 = don't make a plot in this function (default: false)
+%   imFolder             : name of folder to save plots (will be within GLMdenoise folder)
+%                               default = modelTypes
 %
 % Computes the mean betaweights using function summarizeGLMDenoisebyArea
 % and then plots the data in various ways
@@ -46,31 +46,31 @@ function bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
 % Example 1:
 %     projectDir = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
 %     modelTypes  = {'UpsampledToSurfaceTemporal'};
-%     subjects    = {'wlsubj048', 'wlsubj051', 'wlsubj052', 'wlsubj053', 'wlsubj054'};
-%     conditionsOfInterest = [ "onepulse", "twopulse"]; %"crf",
-%     plotAllConditions = false;
+%     subjects    = {'wlsubj051', 'wlsubj052', 'wlsubj053', 'wlsubj054'};
+%     isfmriprep  = true;
 %
-% bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, [],...
-%     [], conditionsOfInterest, [],[], plotAllConditions)
+%   bidsMakeGLMSummaryPlots(projectDir,isfmriprep,modelTypes, subjects)
 %
 % Example 2:
-% projectDir = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
-% modelTypes  = {'temporalpatternRoundedTRToSurface','temporalpatternUpsampledToSurface'};
-% subjects = {'wlsubj001', 'wlsubj062'};
-% sessions = {'nyu3t01', 'nyu3t01'};
-% conditionsOfInterest = ["onepulse", "twopulse"];
-% tasks = {'temporalpattern'};
-% saveFigures = 0;
-% plotAllConditions = true
-% imFolder = {'roundedTR_12', 'upsampled_12'};
+%     projectDir           = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
+%     modelTypes           = {'temporalpatternUpsampled','twoTasksUpsampled'};
+%     subjects             = {'wlsubj001', 'wlsubj062'};
+%     isfmriprep           = true;
+%     sessions             = {'nyu3t01', 'nyu3t03'};
+%     conditionsOfInterest = ["crf"];
+%     tasks                = {'spatialpattern', 'spatialobject'};
+%     saveFigures          = true;
+%     plotAllConditions    = true
+%     imFolder             = {'temporalpatternUpsampled','twoTasksUpsampled'};
+%     plotGroupAvg         = false;
 %
-% bidsMakeGLMSummaryPlots(projectDir , subjects, modelTypes, sessions,...
-%     tasks, conditionsOfInterest, saveFigures, imFolder)
+% bidsMakeGLMSummaryPlots(projectDir,isfmriprep,modelTypes, subjects, sessions,...
+%      tasks, conditionsOfInterest, plotAllConditions, plotGroupAvg, saveFigures, imFolder)
 
 % Set ROI labels and load some stimulus conditions
 [~, ~, ~, bensonAreaLabels] = roisFromAtlas(subjects{1},projectDir, isfmriprep);
 
-load('designMatrixConditions.mat', 'allConditions', 'temporalpattern',...
+load('designMatrixConditions.mat', 'allConditions','GLMdefaults','temporalpattern',...
     'spatialobject', 'spatialpattern', 'conditionSubsets');
 
 
@@ -107,16 +107,22 @@ for mm = 1:length(modelTypes)
     modelType = modelTypes{mm};
     
     % set a dirctory for saving images
-    if ~exist ('imFolder', 'var' )|| isempty(imFolder),saveFolder =  modelTypes{mm}; end
-    if length(imFolder) > 1, saveFolder = imFolder{mm}; else saveFolder = char(imFolder); end
-    imDir = fullfile(projectDir, 'derivatives','GLMdenoise', 'summaryFigures', saveFolder);
+    if ~exist ('imFolder', 'var' )|| isempty(imFolder)
+        saveFolder =  modelTypes{mm};
+    elseif  length(imFolder) > 1
+        saveFolder = imFolder{mm};
+    else
+        saveFolder = char(imFolder);
+    end
+    
+    imDir = fullfile(projectDir, 'derivatives','GLMdenoise','summaryFigures', saveFolder);
     if ~exist(imDir, 'dir' ), mkdir(imDir), end
     
     %loop through subjects and compute the means and standard errors
     for ii = 1:length(subjects)
         subject = subjects{ii};
         if ~skip, session = sessions{ii}; end
-        [meanBeta{ii} , stErr{ii}, GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,session,tasks, conditionsOfInterest, [],[], isfmriprep);
+        [meanBeta{ii} , stErr{ii}, GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir,isfmriprep,modelType, subject,session,tasks,conditionsOfInterest);
     end
     
     if plotGroupAvg
@@ -133,32 +139,6 @@ for mm = 1:length(modelTypes)
         meanBeta = groupMn;
         stErr = groupStErr;
     end
-    
-    %     % For each visual area, make a subplot for each subject across all stimulus GLMconditions
-%     for ll = 1:length(bensonAreaLabels)
-%         f =  figure('Name', sprintf('%s',bensonAreaLabels{ll}));
-%         
-%         for jj = 1:length(subjects)
-%             subplot(length(subjects),1, jj)
-%             bar(meanBeta{jj}(ll,:))
-%             hold on
-%             errorbar(meanBeta{jj}(ll,:),stErr{jj}(ll,:),'LineStyle','none')
-%             title(sprintf('%s',subjects{jj}))
-%             xticks(1: length(GLMconditions))
-%             xticklabels([])
-%             ylabel ('BW')
-%             
-%         end
-%         set(f, 'Position', (f.Position.*[1 1 2 2]))
-%         xticklabels(GLMconditions)
-%         xlabel('Condition')
-%         xtickangle(45)
-%         linkaxes(f.Children,'y')
-%         % Save it
-%         if(saveFigures)
-%             print (fullfile(imDir,sprintf('%s_AvgBetaWeight',bensonAreaLabels{ll})),'-dpng')
-%         end
-%     end
     
     % For each visual area, make a subplot for each subject and stimulus subset
     for ll = 1:length (bensonAreaLabels)
@@ -185,7 +165,7 @@ for mm = 1:length(modelTypes)
         set(f, 'Position', (f.Position.*[1 1 2 2]))
         % Save it
         if(saveFigures)
-            print (fullfile(imDir,sprintf('%s_acrossSubjs_AvgBetaWeight',...
+            print (fullfile(imDir,sprintf('%s_AvgBetaWeightMultiSubs',...
                 bensonAreaLabels{ll})),'-dpng')
         end
     end
@@ -195,15 +175,14 @@ for mm = 1:length(modelTypes)
         for ii = 1:length(conditionsToPlot)
             f = figure('Name', sprintf('%s',subjects{jj}));
             idx = contains (GLMconditions, conditionsToPlot{ii});
-           
-            for ll = 1:length(bensonAreaLabels) 
-                subplot (3, 4, ll) %subplot (3, 4, ll)
+            
+            for ll = 1:length(bensonAreaLabels)
+                subplot (3, 4, ll)
                 bar(meanBeta{jj}(ll,idx))
                 hold on
                 errorbar(meanBeta{jj}(ll,idx),stErr{jj}(ll,idx),'LineStyle','none')
                 xticks(1: length(conditionsToPlot{ii}))
                 title (bensonAreaLabels{ll})
-              %  ylabel ('Avg BetaWeight')
                 
                 if ll == 1 || ll == 5 || ll == 9; ylabel ('Avg BetaWeight'); end
                 
@@ -216,11 +195,8 @@ for mm = 1:length(modelTypes)
                 end
                 
             end
-%             xticklabels(conditionsToPlot{ii})
-%             xlabel('Condition')
-%             xtickangle(45)
             set(f, 'Position', (f.Position.*[1 1 2 2]))
-           % linkaxes(f.Children,'y')
+            % linkaxes(f.Children,'y')
             %save it
             if(saveFigures)
                 print (fullfile(imDir,sprintf('sub-%s_stimSubset-%d_AvgBW',...
@@ -228,6 +204,30 @@ for mm = 1:length(modelTypes)
             end
         end
     end
-    %clear meanBeta stErr
-    %close all
 end
+
+%     % For each visual area, make a subplot for each subject across all stimulus GLMconditions
+%     for ll = 1:length(bensonAreaLabels)
+%         f =  figure('Name', sprintf('%s',bensonAreaLabels{ll}));
+%
+%         for jj = 1:length(subjects)
+%             subplot(length(subjects),1, jj)
+%             bar(meanBeta{jj}(ll,:))
+%             hold on
+%             errorbar(meanBeta{jj}(ll,:),stErr{jj}(ll,:),'LineStyle','none')
+%             title(sprintf('%s',subjects{jj}))
+%             xticks(1: length(GLMconditions))
+%             xticklabels([])
+%             ylabel ('BW')
+%
+%         end
+%         set(f, 'Position', (f.Position.*[1 1 2 2]))
+%         xticklabels(GLMconditions)
+%         xlabel('Condition')
+%         xtickangle(45)
+%         linkaxes(f.Children,'y')
+%         % Save it
+%         if(saveFigures)
+%             print (fullfile(imDir,sprintf('%s_AvgBetaWeight',bensonAreaLabels{ll})),'-dpng')
+%         end
+%     end

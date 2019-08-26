@@ -17,12 +17,11 @@ function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (pro
 %
 %   session              : BIDS session name (string, all lower case)
 %   tasks                : The tasks used for running the GLM
-%                               default : use all tasks 
-%                                   (HRF, temporalpattern, spatialpattern, spatialobject)
+%                               default : use three tasks 
+%                                   (temporalpattern, spatialpattern, spatialobject)
 %                               Note: The total number of conditions should
-%                               matchn the number of columns in design matrices
+%                               match the number of columns in design matrices
 %                               used for GLM
-%   saveFigures          : 0 = don't save figures, 1 = save figures (default: false)
 %   conditionsOfInterest : one or more types experimental conditions used
 %                           for thresholding (string or cell array of strings)
 %                               default: uses all conditions
@@ -90,7 +89,7 @@ R2      = results.R2';
 clear results;
 
 % for now load stimulus condition categories from matfile
-load('designMatrixConditions.mat', 'allConditions', 'temporalpattern',...
+load('designMatrixConditions.mat', 'allConditions', 'GLMdefaults','temporalpattern',...
     'spatialobject', 'spatialpattern', 'conditionSubsets');
 
 GLMconditions = [];

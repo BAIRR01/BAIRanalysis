@@ -176,7 +176,7 @@ for ii = 1: length(tasks)
     ylabel('displacement')
     
     if saveFigs
-        print(fullfile(projectDir,'stimuli', 'summaryFigures', sprintf('sub-%s_ses-%s_task-%s_datagloveCorrected', ...
+        print(fullfile(projectDir,'derivatives', 'summaryFigures', sprintf('sub-%s_ses-%s_task-%s_datagloveCorrected', ...
             subject, session, tasks{ii})), '-dpng')
     end
     
