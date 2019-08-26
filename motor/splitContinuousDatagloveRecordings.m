@@ -1,9 +1,9 @@
 % for parsing continuous dataglove runs into individual task runs
 
 dataDir = '/Volumes/server/Projects/BAIR/Data/BIDS/motor/stimuli';
-subject = 'wlsubj081';
-session = 'nyumeg01';
-tasks   = {'boldhand', 'fingermappingright', 'gestures', 'boldsat1', 'boldsat2' , 'boldsat3' , 'boldsat4' };
+subject = 'wlsubj100';
+session = 'nyu3t01';
+tasks   =  {'boldhand', 'fingermappingright', 'gestures', 'boldsat1', 'boldsat2' , 'boldsat3' , 'boldsat4' };
 saveFile = true;
 
 saveDir = fullfile(dataDir, 'correctedMatfiles');
@@ -33,11 +33,11 @@ for ii = 1: length(tasks)
     num = round(length(endIdx)/2); 
         
     % use that index and place the values into the stim file
-    response.glove = datagloveRaw(endIdx(num)-length(stimulus.seq):endIdx(num),:);
+    response.glove = datagloveRaw((endIdx(num)+0)-length(stimulus.seq):(endIdx(num)+0),:); %+0 for manually adjusting time
     response.datagloveSampleTime = datagloveSampleTimes(endIdx(num)-length(stimulus.seq):endIdx(num),:);
     
     %save it
-    save (fullfile(saveDir, fname), 'params', 'pc', 'PTBTheWindowPtr',...
+    save (fullfile(saveDir, fname), 'params', 'pc', ... %'PTBTheWindowPtr'
     'pth', 'fname' ,'quitProg', 'rc', 'response', 'stimulus', 'time0', 'timeFromT0', 'timing');
     
     % plot to make sure everything looks okay

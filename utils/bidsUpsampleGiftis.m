@@ -4,13 +4,15 @@ function bidsUpsampleGiftis (projectDir, subject, session,tasks, ...
 %
 % Example 1:
 %
-%     projectDir = '/Volumes/server/Projects/BAIR/Data/BIDS/visual_BIDS_compatible';
-%     subject = 'umcuchaam';
+%     projectDir     = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
+%     subject        = 'wlsubj051';
+%     tasks          = {'hrf' 'spatialobject' 'spatialpattern' 'temporalpattern'};
+%     session        = 'nyu3t01';
 %     upsampleFactor = 5;
-%     dataStr = 'fsnative';
-%     outputFolder = 'fmriprepUpsampled';
+%     dataStr        = 'fsnative';
+%     outputFolder   = 'fmriprepUpsampled';
 %
-%     bidsUpsampleGiftis (projectDir, subject, [] ,[], upsampleFactor, dataStr, outputFolder)
+%    bidsUpsampleGiftis (projectDir, subject, session,tasks,upsampleFactor, dataStr, outputFolder)
 %
 % assumes data has been prepocessed and slicetime corrected by fmriprep
 %
@@ -88,11 +90,9 @@ for ii = 1:length(tasks)
             end
             mri.vol = double(dataUpsampled);
             
-            upsmpldFname = lower(sprintf('%sh.sub-%s_ses-%s_task-%s_run-%02d_%s_preproc.mgz',hemis{ll}, subject, session, tasks{ii}, runnums{ii}(jj),dataStr));
-            
             %write data
             fprintf('Writing...\n')
-            MRIwrite(mri,fullfile(dataPathOut,upsmpldFname));
+            MRIwrite(mri,fullfile(dataPathOut,fname(idx).name));
             clear data dataUpsampled
         end
     end

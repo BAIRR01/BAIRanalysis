@@ -1,5 +1,5 @@
-function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType,...
-    session,tasks, conditionsOfInterest, makeFigures, saveFigures, isfmriprep)
+function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (projectDir,isfmriprep,...
+    modelType, subject,session,tasks,conditionsOfInterest, makeFigures, saveFigures)
 % Computes and plots a mean beta weight for each stimulus condition and
 %   visual area using GLM denoise results from surface time-series
 %
@@ -11,6 +11,7 @@ function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (pro
 %   projectDir : path where the BIDS projects lies (string)
 %   subject    : BIDS subject name (string, all lower case)
 %   modelType  : name of folder containing outputs of GLMdenoised (string)
+%   isfmriprep : whether project is an fMRIprep project
 %
 % Optional input:
 %
@@ -26,25 +27,31 @@ function [meanBeta,betasSE , GLMconditions] = bidsSummarizeGLMDenoisebyArea (pro
 %                           for thresholding (string or cell array of strings)
 %                               default: uses all conditions
 %   makeFigures          : 0 = don't make a plot in this function (default: false)
-%   isfmriprep           : whether project is an fMRIprep project
+%   saveFigures          : 0 = don't make a plot in this function (default: false)
 %
 % example 1:
 %
 %   projectDir = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
-%   subject    = 'wlsubj048';
-%   modelType  = 'upsampledToSurfaceAssumeHRF';
+%   isfmriprep = true;
+%   subject    = 'wlsubj051';
+%   modelType  = 'threeTasksUpsampledAssumeHRF';
 %
-%   bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType);
+%   bidsSummarizeGLMDenoisebyArea(projectDir,isfmriprep,modelType,subject)
 %
 % example 2:
 %
 %   projectDir           = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
-%   subject              = 'wlsubj048';
-%   modelType            = 'upsampledToSurfaceAssumeHRF';
-%   conditionsOfInterest = ["crf", "onepulse", "twopulse"];
+%   isfmriprep           = true;
+%   subject              = 'wlsubj062';
+%   modelType            = 'twoTasksUpsampledAssumeHRF';
+%   conditionsOfInterest = ["crf"];
+%   session              = 'nyu3t03';
+%   makeFigures          = true;
+%   saveFigures          = true;
+%   tasks                = {'spatialpattern','spatialobject'};
 %
-%   bidsSummarizeGLMDenoisebyArea (projectDir , subject, modelType, [], [], conditionsOfInterest);
-%
+%   bidsSummarizeGLMDenoisebyArea (projectDir,isfmriprep,...
+%    modelType, subject,session,tasks,conditionsOfInterest, makeFigures, saveFigures)
 %
 
 %% Check inputs and define paths
@@ -53,6 +60,9 @@ if ~exist('session', 'var') || isempty(session)
 end
 if ~exist ('modelType', 'var' )|| isempty(modelType)
     error ('modelType not defined')
+end
+if ~exist ('isfmriprep', 'var' )|| isempty(isfmriprep)
+    error ('isfmriprep not defined')
 end
 if ~exist ('saveFigures', 'var' )|| isempty(saveFigures)
     saveFigures = 0;
@@ -63,7 +73,6 @@ end
 % set path to GLM results
 resultsDir = fullfile(projectDir, 'derivatives','GLMdenoise', modelType,...
     sprintf('sub-%s',subject), sprintf('ses-%s',session), 'figures');
-
 
 %% Load Data, find stimulus conditions and set ROI labels
 
@@ -86,7 +95,7 @@ load('designMatrixConditions.mat', 'allConditions', 'temporalpattern',...
 
 GLMconditions = [];
 if ~exist ('tasks', 'var' )|| isempty(tasks)
-    GLMconditions = allConditions;
+    GLMconditions = GLMdefaults;
 else
     experiments = {'spatialpattern','temporalpattern', 'spatialobject'};
     %loop through the experiments to make sure the condition order is
@@ -148,14 +157,14 @@ if makeFigures
         ylabel ('BW')
         xticklabels(GLMconditions)
         xtickangle (45)
-        set(f, 'Position', (f.Position.*[1 1 1.5 2]))
-        
+        set(f, 'Position', (f.Position.*[1 1 1.5 2])) 
     end
     xticklabels(GLMconditions)
     xtickangle (45)
     
     % save it
     if(saveFigures)
+        imDir = fullfile(projectDir, 'derivatives','GLMdenoise', modelType);
         print (fullfile(imDir,sprintf('sub-%s_stimSubset-%d_AvgBW',...
             subject{jj}, ii)),'-dpng')
     end
