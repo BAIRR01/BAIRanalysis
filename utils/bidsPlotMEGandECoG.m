@@ -33,8 +33,8 @@ function bidsPlotMEGandECoG (projectDir, subject, session, tasks,runnums, ...
 %     plotChecks       = true;
 %     goodChannelRatio = .1;
 %
-%     bidsPlotMEGandECoG (projectDir, subject, session, tasks,runnums, saveFolder,plotChecks, goodChannelRatio)
-%
+%     bidsPlotMEGandECoG (projectDir, subject, session, tasks,runnums,goodChannelRatio, saveFolder,plotChecks)
+
 %% Set up paths and options
 if ~exist('projectDir', 'var') || isempty(projectDir)
     error('projectDir not defined');
