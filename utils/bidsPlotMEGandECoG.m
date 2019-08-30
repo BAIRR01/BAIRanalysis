@@ -105,7 +105,7 @@ for ii = 1:length (tasks)
             epochLength = [0 1]; % start and end of epoch (seconds), zero is stimTrigger onset
             fs          = 1000;  % Hz
             % Get sensordata (time x epochs x channels)
-            [epocedData, ~] = meg_make_epochs(fullTimeseries', allOnsets, epochLength, fs);
+            [epocedData, ~] = meg_make_epochs(fullTimeseries', allTriggers, epochLength, fs);
             
             % figure out which sensors to plot and pick a subset with the
             % highest variance to plot later
