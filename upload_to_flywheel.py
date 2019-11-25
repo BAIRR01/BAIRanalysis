@@ -149,7 +149,7 @@ for arg in sys.argv[1:]: # skip the first arg (script invocation)
     elif patharg is None:                   patharg = arg
     elif projarg is None:                   projarg = arg
     else:
-        print("SYNTAX: flywheel.py <BIDS_path> <project_name>")
+        print("SYNTAX: upload_to_flywheel.py <BIDS_path> <project_name>")
         sys.exit(1)
 if subjarg:
     print("Uploading single subject directory %s to project %s" % (patharg, projarg))
