@@ -4,17 +4,19 @@ from os import environ, remove
 from zipfile import ZipFile, ZIP_DEFLATED
 import sys, pathlib, logging
 
-from flywheel import Flywheel
+#from flywheel import flywheel
+import flywheel
 
 GROUPID = 'bair'
 
 # Setup logging--set our default level to debug
 lg = logging.getLogger('xelo2bids')
 lg.setLevel(logging.DEBUG)
-
+fw = flywheel.Client()
 
 def delete_flywheel_project(project_name):
-    fw = Flywheel(environ['FLYWHEEL_TOKEN'])
+    #fw = Client(environ['FLYWHEEL_TOKEN'])
+    fw = flywheel.Client()
 
     projectId = [x['_id'] for x in fw.get_all_projects() if x['label'] == project_name][0]
     lg.warning(f'Deleting project "{project_name}" with id {projectId}')
@@ -37,7 +39,8 @@ def delete_flywheel_project(project_name):
     return permissions
 
 def find_project_id(project_name, permissions, fw=None):
-    if fw is None: fw = Flywheel(environ['FLYWHEEL_TOKEN'])
+    if fw is None: fw = flywheel.Client()
+    #fw = Client(environ['FLYWHEEL_TOKEN'])
     projects = [x['_id'] for x in fw.get_all_projects() if x['label'] == project_name]
     if len(projects) == 1:
         projectId = projects[0]
@@ -51,7 +54,8 @@ def find_project_id(project_name, permissions, fw=None):
 
 def upload_subject_dir(path, project_name, permissions=None, fw=None, projectId=None):
     if permissions is None: permissions = []
-    if fw is None: fw = Flywheel(environ['FLYWHEEL_TOKEN'])
+    if fw is None: fw = flywheel.Client()
+    #if fw is None: fw = Client(environ['FLYWHEEL_TOKEN'])
     if projectId is None: projectId = find_project_id(project_name, permissions, fw=fw)
     path = pathlib.Path(path)
     subjectId = {
@@ -97,7 +101,8 @@ def upload_subject_dir(path, project_name, permissions=None, fw=None, projectId=
 
 def upload_project_dir(bids_root, project_name, permissions=None, fw=None):
     if permissions is None: permissions = []
-    if fw is None: fw = Flywheel(environ['FLYWHEEL_TOKEN'])
+    #if fw is None: fw = Client(environ['FLYWHEEL_TOKEN'])
+    if fw is None: fw = flywheel.Client()
     projectId = find_project_id(project_name, permissions, fw=fw)
     bids_root = pathlib.Path(bids_root)
     for extra in bids_root.iterdir():
@@ -110,7 +115,7 @@ def upload_project_dir(bids_root, project_name, permissions=None, fw=None):
             _zip_and_upload(extra, fw, projectId)
             continue
         else:
-            upload_subject_dir(extra, project_name, projectID=projectID, fw=fw,
+            upload_subject_dir(extra, project_name, projectId=projectId, fw=fw,
                                permissions=permissions)
 
 
