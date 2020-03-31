@@ -4,7 +4,7 @@ from os import environ, remove
 from zipfile import ZipFile, ZIP_DEFLATED
 import sys, pathlib, logging
 
-#from flywheel import flywheel
+#from flywheel import Flywheel
 import flywheel
 
 GROUPID = 'bair'
@@ -12,10 +12,9 @@ GROUPID = 'bair'
 # Setup logging--set our default level to debug
 lg = logging.getLogger('xelo2bids')
 lg.setLevel(logging.DEBUG)
-fw = flywheel.Client()
 
 def delete_flywheel_project(project_name):
-    #fw = Client(environ['FLYWHEEL_TOKEN'])
+    #fw = Flywheel(environ['FLYWHEEL_TOKEN'])
     fw = flywheel.Client()
 
     projectId = [x['_id'] for x in fw.get_all_projects() if x['label'] == project_name][0]
@@ -40,7 +39,7 @@ def delete_flywheel_project(project_name):
 
 def find_project_id(project_name, permissions, fw=None):
     if fw is None: fw = flywheel.Client()
-    #fw = Client(environ['FLYWHEEL_TOKEN'])
+    #fw = Flywheel(environ['FLYWHEEL_TOKEN'])
     projects = [x['_id'] for x in fw.get_all_projects() if x['label'] == project_name]
     if len(projects) == 1:
         projectId = projects[0]
@@ -101,7 +100,7 @@ def upload_subject_dir(path, project_name, permissions=None, fw=None, projectId=
 
 def upload_project_dir(bids_root, project_name, permissions=None, fw=None):
     if permissions is None: permissions = []
-    #if fw is None: fw = Client(environ['FLYWHEEL_TOKEN'])
+    #if fw is None: fw = Flywheel(environ['FLYWHEEL_TOKEN'])
     if fw is None: fw = flywheel.Client()
     projectId = find_project_id(project_name, permissions, fw=fw)
     bids_root = pathlib.Path(bids_root)
