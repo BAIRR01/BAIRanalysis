@@ -1,8 +1,9 @@
 docker pull cbinyu/bids_pydeface:v2.0.3
 
 bidsFolder=/Volumes/server/Projects/BAIR/Data/BIDS/visual 
-subjectID=som726
+subjectID=som692
 sessionID=som3t01
+
 logFolder=${bidsFolder}/derivatives/preprocessing_logs/sub-${subjectID}
 
 mkdir -p $logFolder
