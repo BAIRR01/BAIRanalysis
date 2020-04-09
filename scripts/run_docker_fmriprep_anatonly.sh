@@ -1,9 +1,9 @@
-
+bidsFolder=/Volumes/server/Projects/BAIR/Data/BIDS/visual 
 subjectID=som726
 
 docker run --rm -it -v /Applications/freesurfer/license.txt:/opt/freesurfer/license.txt:ro \
-		-v /Volumes/server/Projects/BAIR/Data/BIDS/visual:/data \
-		-v /Volumes/server/Projects/BAIR/Data/BIDS/visual/derivatives:/out \
+		-v ${bidsFolder}:/data \
+		-v ${bidsFolder}/derivatives:/out \
 		poldracklab/fmriprep:20.0.5 \
 		/data \
 		/out \
@@ -13,4 +13,4 @@ docker run --rm -it -v /Applications/freesurfer/license.txt:/opt/freesurfer/lice
 		--no-submm-recon \
 		--skip-bids-validation \
 		--anat-only \
-		--nthreads 6 | tee /Volumes/server/Projects/BAIR/Data/BIDS/visual/derivatives/preprocessing_logs/sub-${subjectID}/sub-${subjectID}_fMRIPrep_anatonly.txt
+		--nthreads 6 | tee /${bidsFolder}/derivatives/preprocessing_logs/sub-${subjectID}/sub-${subjectID}_fMRIPrep_anatonly.txt
