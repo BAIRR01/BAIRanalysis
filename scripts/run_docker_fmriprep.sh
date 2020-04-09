@@ -1,6 +1,8 @@
 bidsFolder=/Volumes/server/Projects/BAIR/Data/BIDS/visual 
 subjectID=som726
 
+logFolder=${bidsFolder}/derivatives/preprocessing_logs/sub-${subjectID}
+
 docker run --rm -it -v /Applications/freesurfer/license.txt:/opt/freesurfer/license.txt:ro \
 		-v ${bidsFolder}:/data \
 		-v ${bidsFolder}/derivatives:/out \
@@ -13,4 +15,4 @@ docker run --rm -it -v /Applications/freesurfer/license.txt:/opt/freesurfer/lice
 		--no-submm-recon \
 		--skip-bids-validation \
 		--coreg-init-header \
-		--nthreads 6 | tee /${bidsFolder}/derivatives/preprocessing_logs/sub-${subjectID}/sub-${subjectID}_fMRIPrep.txt
+		--nthreads 6 | tee ${logFolder}/sub-${subjectID}_fMRIPrep.txt
