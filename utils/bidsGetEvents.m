@@ -8,7 +8,7 @@ function bidsGetEvents(projectDir, subject, session, tasks, dryRun)
 % Example 1:
 %
 %     projectDir     = '/Volumes/server/Projects/BAIR/Data/BIDS/visual';
-%     subject        = 'wlsubj051';
+%     subject        = 'wlsubj102';
 %     session        = 'nyu3t01';
 %     tasks          = [];
 %     dryRun         = 1;
@@ -16,13 +16,13 @@ function bidsGetEvents(projectDir, subject, session, tasks, dryRun)
 %    bidsGetEvents(projectDir, subject, session, tasks, dryRun)
 %
 % When dryRun = 1, no files will be written, only an list of the found
-% files will be outputted.
+% files will be outputted. It is recommended to first do a dry run to check
+% for any warnings, before running with the default setting (dryRun = 0). 
 %
-% Note that a session input argument is needed if a subject has multiple
+% Note that the session argument needs to defined if a subject has multiple
 % sessions (see bidsSpecifyEPIs).
 %
 % IG, 2020
-%
 
 if ~exist('session', 'var'), session = []; end
 if ~exist('tasks', 'var'), tasks = []; end
