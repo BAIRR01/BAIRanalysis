@@ -1,7 +1,7 @@
 function bidsGetEvents(projectDir, subject, session, tasks, dryRun)
 % Events files as written by CBI do not contain actual events. Get the
 % events files from the stimulus outputfiles located in the 'stimuli'
-% folder in projectDir. 
+% folder in projectDir and write them to the BIDS data folder.
 %
 % bidsGetEvents(projectDir, subject, [session] ,[tasks], [dryRun])
 %
@@ -15,8 +15,9 @@ function bidsGetEvents(projectDir, subject, session, tasks, dryRun)
 %
 %    bidsGetEvents(projectDir, subject, session, tasks, dryRun)
 %
-% When dryRun = 1, no files will be written, only an index of the found
-% files outputted.
+% When dryRun = 1, no files will be written, only an list of the found
+% files will be outputted.
+%
 % Note that a session input argument is needed if a subject has multiple
 % sessions (see bidsSpecifyEPIs).
 %
@@ -49,6 +50,7 @@ d = 0;
 for ii = 1:length(tasks)
     for jj = 1:length (runnums{ii})
         d = d+1;
+        
         stimPrefix = sprintf('sub-%s_ses-%s_task-%s_run-%d.mat',...
             subject, session, tasks{ii},runnums{ii}(jj));
         
@@ -59,11 +61,11 @@ for ii = 1:length(tasks)
         S = dir(fullfile(stimPath, stimPrefix));
         % Check if the stimulus file exists, if not skip
         if isempty(S)
-            fprintf('[%s] No stimulus file found for subject %s, session %s, task %s, run %d! Skipping \n', ...
+            warning('[%s] No stimulus file found for subject %s, session %s, task %s, run %d! Skipping \n', ...
                 mfilename, subject, session, tasks{ii}, jj); 
         % Check if there are multiple stimulus files, if so skip
         elseif length(S)> 1
-             fprintf('[%s] Multiple stimulus file found for subject %s, session %s, task %s, run %d! Skipping \n', ...
+             warning('[%s] Multiple stimulus file found for subject %s, session %s, task %s, run %d! Skipping \n', ...
                 mfilename, subject, session, tasks{ii}, jj); 
         else
             % List the found stimulus file
@@ -75,7 +77,7 @@ for ii = 1:length(tasks)
                 fprintf('[%s] Loading stimfile... \n', mfilename); 
                 logFile = load(fullfile(stimPath,S.name));
                 if ~isfield(logFile.stimulus, 'tsv')
-                    fprintf('[%s] No tsv field found in stimfile! Skipping \n', mfilename); 
+                    warning('[%s] No tsv field found in stimfile! Skipping \n', mfilename); 
                 else             
                     tsvToWrite = logFile.stimulus.tsv;
                     writeName = sprintf('sub-%s_ses-%s_task-%s_acq-%s_run-%02d_events.tsv', ...
