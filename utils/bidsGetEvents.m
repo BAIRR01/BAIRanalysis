@@ -40,9 +40,9 @@ stimPath = fullfile(projectDir, 'stimuli');
 
 % Check if we have event files for each run
 D = dir(fullfile(dataPath, '*events.tsv'));
-assert(length(D) == length([runnums{:}]));
+%assert(length(D) == length([runnums{:}]));
 
-acq_label = bidsGet(D(1).name, 'acq');
+acq_label = 'normal';%bidsGet(D(1).name, 'acq');
 d = 0;
 
 % Find the corresponding stimulus mat file in the stimuli folder, and overwrite
@@ -82,12 +82,12 @@ for ii = 1:length(tasks)
                     tsvToWrite = logFile.stimulus.tsv;
                     writeName = sprintf('sub-%s_ses-%s_task-%s_acq-%s_run-%02d_events.tsv', ...
                         subject, session, tasks{ii}, acq_label, jj);
-                    if ~isequal(writeName, D(d).name)
-                        fprintf('[%s] To be written name does not match existing name! Skipping \n', mfilename); 
-                    else
+                    %if ~isequal(writeName, D(d).name)
+                    %    fprintf('[%s] To be written name does not match existing name! Skipping \n', mfilename); 
+                    %else
                         fprintf('[%s] Writing tsv to %s... \n', mfilename, fullfile(dataPath, writeName)); 
                         writetable(tsvToWrite, fullfile(dataPath, writeName),'FileType','text','Delimiter','\t');
-                    end
+                    %end
                 end 
             end
         end
