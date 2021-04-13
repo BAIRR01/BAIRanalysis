@@ -1,9 +1,12 @@
 Instructions on how to upload data to flywheel using the terminal.
 
 Before uploading, you have to: 
-* Download and install Flywheel's CLI (command line interface) and SDK (software development kit). Please follow instructions on the Flywheel website on how to set this up.
+* Download and install Flywheel's CLI (command line interface) and SDK (software development kit). Please follow instructions on the Flywheel website on how to set this up. The CLI you download from the Flywheel Profile page; the SDK is installed via the command 
+
+pip install flywheel-sdk~=14.6.2
+
 * Generate a Flywheel token: you can find this on your Profile page in the Flywheel website. It will be something like bair.flywheel.io:XXXXXXXXXXXX. Replace the --token flag in the command below with your own token.
-* Have python 3.6 installed.
+* Have python 3.6 installed (you can check by typing python3 --version in the Terminal)
 
 Use upload_to_flywheel.py to upload the data. The script is located on GitHub in the BairAnalysis repository https://github.com/BAIRR01/BAIRanalysis, inside 'scripts'.
 
