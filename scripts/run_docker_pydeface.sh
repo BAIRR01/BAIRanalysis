@@ -1,7 +1,7 @@
-docker pull cbinyu/bids_pydeface:v2.0.3
+docker pull cbinyu/bids_pydeface:latest
 
-bidsFolder=/Volumes/server/Projects/BAIR/Data/BIDS/visual 
-subjectID=som692
+bidsFolder=/Users/iiagroen/surfdrive/BAIR/BIDS/visual_ecog_recoded
+subjectID=p03
 sessionID=som3t01
 
 logFolder=${bidsFolder}/derivatives/preprocessing_logs/sub-${subjectID}
